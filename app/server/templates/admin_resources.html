@@ -1,0 +1,94 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="flex-between mb-10">
+    <h2 style="color: #1e293b; font-size: 17px; font-weight: 600; display: flex; align-items: center; gap: 6px;">
+        <span style="font-size: 19px;">📂</span> 资源管理
+    </h2>
+    <a href="{{ url_for('admin_add_resource_page') }}" class="btn btn-success btn-sm" style="white-space: nowrap;">➕ 添加资源</a>
+</div>
+
+<!-- ===== 资源列表 ===== -->
+<div class="card">
+    <div class="table-wrapper">
+        <table>
+            <thead><tr><th>标题</th><th>分类</th><th>标签</th><th>大小</th><th>下载次数</th><th>上传时间</th><th>操作</th></tr></thead>
+            <tbody>
+                {% for r in resources %}
+                <tr>
+                    <td>
+                        <strong style="color: #1e293b;">{{ r.title }}</strong>
+                        {% if r.description %}
+                            <br><span style="color: #94a3b8; font-size: 12px;">{{ r.description|striptags|truncate(60) }}</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ r.category.name if r.category else '-' }}</td>
+                    <td>{% for tag in r.tags %}<span class="tag">{{ tag.name }}</span>{% endfor %}</td>
+                    <td>{{ r.file_size|filesizeformat }}</td>
+                    <td>{{ r.download_count }}</td>
+                    <td>{{ r.created_at.strftime('%Y-%m-%d') }}</td>
+                    <td>
+                        <a href="{{ url_for('admin_edit_resource_page', resource_id=r.id) }}" class="btn btn-outline btn-sm">✏️ 编辑</a>
+                        <form method="POST" action="{{ url_for('admin_delete_resource', resource_id=r.id) }}" style="display: inline;" onsubmit="return confirm('确定删除此资源？')">
+                            <button type="submit" class="btn btn-danger btn-sm">删除</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% if not resources %}
+        <p class="text-muted" style="text-align: center; padding: 20px 0;">暂无资源，去 <a href="{{ url_for('admin_add_resource_page') }}" style="color: #2563eb;">添加</a></p>
+    {% endif %}
+</div>
+
+<!-- ===== 分类管理 ===== -->
+<div class="card">
+    <div class="flex-between" style="margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid #e8edf2;">
+        <h2 style="font-size: 15px; font-weight: 600; color: #1e293b; display: flex; align-items: center; gap: 8px; margin: 0; padding: 0; border: none;">
+            🏷️ 分类管理
+        </h2>
+        <form method="POST" action="{{ url_for('admin_add_category') }}" style="display: flex; gap: 6px; align-items: center; flex-shrink: 0;">
+            <input type="text" name="name" placeholder="分类名称" required style="padding: 5px 10px; border: 1px solid #d1d9e6; border-radius: 6px; font-size: 13px; width: 110px;">
+            <button type="submit" class="btn btn-success btn-sm" style="white-space: nowrap;">添加分类</button>
+        </form>
+    </div>
+    <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+        {% for c in categories %}
+            <span class="tag" style="display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px 3px 14px; font-size: 12px;">
+                {{ c.name }}
+                <form method="POST" action="{{ url_for('admin_delete_category', category_id=c.id) }}" style="display: inline;" onsubmit="return confirm('确定删除分类「{{ c.name }}」？')">
+                    <button type="submit" style="background: none; border: none; color: #ef4444; cursor: pointer; font-size: 14px; line-height: 1; padding: 0 2px;">×</button>
+                </form>
+            </span>
+        {% else %}
+            <span class="text-muted" style="font-size: 13px;">暂无分类</span>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- ===== 标签管理 ===== -->
+<div class="card">
+    <div class="flex-between" style="margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid #e8edf2;">
+        <h2 style="font-size: 15px; font-weight: 600; color: #1e293b; display: flex; align-items: center; gap: 8px; margin: 0; padding: 0; border: none;">
+            🔖 标签管理
+        </h2>
+        <form method="POST" action="{{ url_for('admin_add_tag') }}" style="display: flex; gap: 6px; align-items: center; flex-shrink: 0;">
+            <input type="text" name="name" placeholder="标签名称" required style="padding: 5px 10px; border: 1px solid #d1d9e6; border-radius: 6px; font-size: 13px; width: 110px;">
+            <button type="submit" class="btn btn-success btn-sm" style="white-space: nowrap;">添加标签</button>
+        </form>
+    </div>
+    <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+        {% for t in tags %}
+            <span class="tag" style="display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px 3px 14px; font-size: 12px;">
+                {{ t.name }}
+                <form method="POST" action="{{ url_for('admin_delete_tag', tag_id=t.id) }}" style="display: inline;" onsubmit="return confirm('确定删除标签「{{ t.name }}」？')">
+                    <button type="submit" style="background: none; border: none; color: #ef4444; cursor: pointer; font-size: 14px; line-height: 1; padding: 0 2px;">×</button>
+                </form>
+            </span>
+        {% else %}
+            <span class="text-muted" style="font-size: 13px;">暂无标签</span>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

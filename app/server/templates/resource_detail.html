@@ -1,0 +1,36 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="flex-between mb-10">
+    <a href="{{ url_for('resource_list') }}" class="btn btn-outline btn-sm">← 返回资源列表</a>
+</div>
+
+<div class="card">
+    <h2 style="font-size: 18px; font-weight: 600; color: #1e293b; margin-bottom: 6px;">{{ resource.title }}</h2>
+    <div style="display: flex; flex-wrap: wrap; gap: 6px 12px; margin-bottom: 12px; font-size: 13px; color: #94a3b8;">
+        <span>📂 {{ resource.category.name if resource.category else '未分类' }}</span>
+        <span>📄 {{ resource.file_size|filesizeformat }}</span>
+        <span>⬇️ {{ resource.download_count }} 次下载</span>
+        <span>📅 {{ resource.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+        {% for tag in resource.tags %}
+            <span class="tag">{{ tag.name }}</span>
+        {% endfor %}
+    </div>
+    <div style="border-top: 1px solid #e8edf2; padding-top: 14px; line-height: 1.8; color: #475569; font-size: 15px;">
+        {% if resource.description %}
+            {{ resource.description|markdown|safe if resource.description else '' }}
+        {% else %}
+            <span class="text-muted">暂无描述</span>
+        {% endif %}
+    </div>
+    <div style="margin-top: 16px; padding-top: 14px; border-top: 1px solid #e8edf2; display: flex; gap: 10px; flex-wrap: wrap;">
+        {% if current_user.is_authenticated %}
+            <a href="{{ url_for('download_resource', resource_id=resource.id) }}" class="btn btn-primary">⬇ 下载</a>
+            {% if current_user.is_admin %}
+                <a href="{{ url_for('admin_edit_resource_page', resource_id=resource.id) }}" class="btn btn-outline">✏️ 编辑</a>
+            {% endif %}
+        {% else %}
+            <span class="text-muted">登录后下载</span>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,40 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="flex-between mb-10">
+    <h2 style="color: #1e293b; font-size: 17px; font-weight: 600; display: flex; align-items: center; gap: 6px;">
+        <span style="font-size: 19px;">✏️</span> 编辑资源
+    </h2>
+    <a href="{{ url_for('admin_resources') }}" class="btn btn-outline btn-sm">← 返回</a>
+</div>
+
+<div class="card">
+    <form method="POST">
+        <div style="margin-bottom: 12px;">
+            <label style="display: block; font-weight: 500; font-size: 13px; color: #475569; margin-bottom: 3px;">标题 *</label>
+            <input type="text" name="title" value="{{ resource.title }}" required style="width: 100%; padding: 7px 12px; border: 1px solid #d1d9e6; border-radius: 6px; font-size: 14px;">
+        </div>
+        <div style="margin-bottom: 12px;">
+            <label style="display: block; font-weight: 500; font-size: 13px; color: #475569; margin-bottom: 3px;">分类</label>
+            <select name="category_id" style="width: 100%; padding: 7px 12px; border: 1px solid #d1d9e6; border-radius: 6px; font-size: 14px;">
+                <option value="">选择分类</option>
+                {% for c in categories %}
+                    <option value="{{ c.id }}" {% if resource.category_id == c.id %}selected{% endif %}>{{ c.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div style="margin-bottom: 12px;">
+            <label style="display: block; font-weight: 500; font-size: 13px; color: #475569; margin-bottom: 3px;">描述（支持 Markdown）</label>
+            <textarea name="description" style="width: 100%; min-height: 100px; padding: 7px 12px; border: 1px solid #d1d9e6; border-radius: 6px; font-size: 14px; font-family: monospace;">{{ resource.description }}</textarea>
+        </div>
+        <div style="margin-bottom: 12px;">
+            <label style="font-weight: 500; font-size: 13px; color: #475569;">标签</label>
+            {% for t in tags %}
+                <label style="margin-right: 12px; font-weight: normal;">
+                    <input type="checkbox" name="tag_ids" value="{{ t.id }}" {% if t in resource.tags %}checked{% endif %}> {{ t.name }}
+                </label>
+            {% endfor %}
+        </div>
+        <button type="submit" class="btn btn-primary">保存</button>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,21 @@
+[
+  {
+    "stepTitle": "存储路径修改",
+    "items": [
+      {
+        "type": "text",
+        "field": "wizard_upload_path",
+        "label": "上传资源存储路径",
+        "rules": [
+          {
+            "required": true,
+            "message": "请设置资源上传存储路径"
+          }
+        ],
+        "options": [],
+        "helpText": "文件上传后存储的目录，可自定义，例如 /vol1/@appshare/cloud-resources",
+        "initValue": " /vol1/@appshare/cloud-resources"
+      }
+    ]
+  }
+]

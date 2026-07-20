@@ -1,0 +1,108 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="flex-between mb-10">
+    <h2 style="color: #1e293b; font-size: 17px; font-weight: 600; display: flex; align-items: center; gap: 6px;">
+        <span style="font-size: 19px;">⚙️</span> 站点设置
+    </h2>
+    <div class="flex">
+        <a href="{{ url_for('admin_license') }}" class="btn btn-outline btn-sm">🔑 授权管理</a>
+        <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline btn-sm">返回管理</a>
+    </div>
+</div>
+
+<!-- ===== 站点基本信息（免费） ===== -->
+<div class="card">
+    <h2
+        style="font-size: 15px; font-weight: 600; color: #1e293b; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid #e8edf2;">
+        📋 站点基本信息</h2>
+    <form method="POST" action="{{ url_for('admin_save_settings') }}">
+        <div style="margin-bottom: 14px;">
+            <label
+                style="display: block; font-weight: 500; font-size: 13px; color: #475569; margin-bottom: 3px;">站点名称</label>
+            <input type="text" name="site_name" value="{{ config.site_name }}"
+                style="width: 100%; max-width: 400px; padding: 7px 12px; border: 1px solid #d1d9e6; border-radius: 6px; font-size: 14px;">
+        </div>
+        <div style="margin-bottom: 14px;">
+            <label
+                style="display: block; font-weight: 500; font-size: 13px; color: #475569; margin-bottom: 3px;">站点简介</label>
+            <input type="text" name="site_intro" value="{{ config.site_intro }}"
+                style="width: 100%; max-width: 400px; padding: 7px 12px; border: 1px solid #d1d9e6; border-radius: 6px; font-size: 14px;">
+        </div>
+        <div style="margin-bottom: 14px;">
+            <label
+                style="display: block; font-weight: 500; font-size: 13px; color: #475569; margin-bottom: 3px;">关于我们（支持
+                Markdown）</label>
+            <div
+                style="margin-bottom: 4px; font-size: 12px; color: #94a3b8; background: #f0f7ff; padding: 8px 12px; border-radius: 4px;">
+                💡 支持 Markdown 语法：<code># 标题</code>、<code>**加粗**</code>、<code>![图片](/图片名.png)</code>
+            </div>
+            <textarea name="about_content"
+                style="width: 100%; min-height: 200px; padding: 10px; border: 1px solid #d1d9e6; border-radius: 6px; font-family: monospace; font-size: 14px;">{{ config.about_content }}</textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">保存基本设置</button>
+    </form>
+</div>
+
+<!-- ===== 品牌定制（增值功能，需授权） ===== -->
+<div class="card">
+    <h2
+        style="font-size: 15px; font-weight: 600; color: #1e293b; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid #e8edf2;">
+        🎨 品牌定制
+        {% if not license or license.license_type == 'none' or not license.is_valid %}
+        <span style="font-size: 12px; font-weight: 400; color: #f59e0b;">（需要激活码解锁）</span>
+        {% endif %}
+    </h2>
+
+    {% if license and license.license_type != 'none' and license.is_valid %}
+    <form method="POST" action="{{ url_for('admin_save_settings') }}" enctype="multipart/form-data">
+        <div style="margin-bottom: 14px;">
+            <label style="display: block; font-weight: 500; font-size: 13px; color: #475569; margin-bottom: 3px;">自定义
+                LOGO</label>
+            <div style="display: flex; flex-wrap: wrap; gap: 12px; align-items: center;">
+                {% if config.custom_logo %}
+                <div style="border: 1px solid #e8edf2; border-radius: 6px; padding: 6px; background: #f8fafc;">
+                    <img src="/{{ config.custom_logo }}" style="max-height: 40px; max-width: 120px; display: block;">
+                </div>
+                <span style="font-size: 12px; color: #94a3b8;">当前：{{ config.custom_logo }}</span>
+                {% else %}
+                <span style="font-size: 12px; color: #94a3b8;">未设置</span>
+                {% endif %}
+            </div>
+            <div style="margin-top: 6px;">
+                <input type="file" name="custom_logo" accept="image/png,image/jpg,image/jpeg,image/svg+xml"
+                    style="padding: 4px; font-size: 13px;">
+                <div style="font-size: 11px; color: #94a3b8; margin-top: 2px;">建议 200x60px，存于存储目录</div>
+            </div>
+        </div>
+
+        <div style="margin-bottom: 12px;">
+            <label
+                style="display: flex; align-items: center; gap: 8px; font-weight: 500; font-size: 13px; color: #475569; cursor: pointer;">
+                <input type="checkbox" name="hide_dev_info" {% if config.hide_dev_info %}checked{% endif %}> 隐藏开发者信息
+            </label>
+        </div>
+
+        <div style="margin-bottom: 14px;">
+            <label
+                style="display: block; font-weight: 500; font-size: 13px; color: #475569; margin-bottom: 3px;">自定义开发者信息</label>
+            <input type="text" name="custom_dev_info" value="{{ config.custom_dev_info }}" placeholder="例如：XX团队"
+                style="width: 100%; max-width: 400px; padding: 7px 12px; border: 1px solid #d1d9e6; border-radius: 6px; font-size: 14px;">
+        </div>
+
+        <button type="submit" class="btn btn-primary">保存品牌设置</button>
+    </form>
+    <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e8edf2; font-size: 12px; color: #94a3b8;">
+        ✅ 已授权：{{ license.license_type }}
+        {% if license.license_type == 'trial' or license.license_type == 'annual' %}
+        （{{ license.expires_at.strftime('%Y-%m-%d') }} 到期）
+        {% endif %}
+    </div>
+    {% else %}
+    <div style="background: #fef9e7; padding: 14px 16px; border-radius: 6px; border-left: 3px solid #f59e0b;">
+        <p><strong>🔒 品牌定制为增值功能</strong></p>
+        <p style="font-size: 13px; margin: 4px 0;">自定义 LOGO、隐藏开发者信息、自定义开发者信息</p>
+        <a href="{{ url_for('admin_license') }}" class="btn btn-primary btn-sm" style="margin-top: 8px;">前往激活</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

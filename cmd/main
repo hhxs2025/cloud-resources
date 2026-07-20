@@ -1,0 +1,128 @@
+#!/bin/bash
+
+LOG_FILE="${TRIM_PKGVAR}/info.log"
+PID_FILE="${TRIM_PKGVAR}/app.pid"
+
+log_msg() {
+    echo "$(date '+%Y-%m-%d %H:%M:%S') - $1" >> "$LOG_FILE"
+}
+
+start_process() {
+    if status; then
+        return 0
+    fi
+
+    # 固定代码路径（代码在 @appcenter 下）
+    CODE_DIR="/vol1/@appcenter/cloud-resources/server"
+
+    if [ ! -d "$CODE_DIR" ]; then
+        log_msg "代码目录不存在: $CODE_DIR"
+        return 1
+    fi
+
+    # 如果 TRIM_APPDEST 没设，用代码目录
+    if [ -z "${TRIM_APPDEST}" ]; then
+        export TRIM_APPDEST="$CODE_DIR"
+    fi
+
+    log_msg "启动云资源..."
+    log_msg "TRIM_APPDEST=${TRIM_APPDEST}"
+    log_msg "代码目录: ${CODE_DIR}"
+
+    WIZARD_PORT="${wizard_port:-${TRIM_SERVICE_PORT:-5665}}"
+    WIZARD_UPLOAD_PATH="${wizard_upload_path:-${TRIM_APPDEST}/uploads}"
+
+    log_msg "使用端口: ${WIZARD_PORT}"
+    log_msg "使用上传目录: ${WIZARD_UPLOAD_PATH}"
+
+    mkdir -p "${WIZARD_UPLOAD_PATH}"
+    mkdir -p "${TRIM_PKGVAR}"
+
+    cd "$CODE_DIR" || {
+        log_msg "无法进入代码目录: $CODE_DIR"
+        return 1
+    }
+
+    export TRIM_APPDEST="$CODE_DIR"
+    export TRIM_PKGVAR="${TRIM_PKGVAR}"
+    export TRIM_SERVICE_PORT="${WIZARD_PORT}"
+    export wizard_upload_path="${WIZARD_UPLOAD_PATH}"
+    export PYTHONPATH="${CODE_DIR}/vendor:${PYTHONPATH}"
+
+    if [ -f "start.py" ]; then
+        PYTHON_ENTRY="start.py"
+        log_msg "使用入口: start.py"
+    elif [ -f "app.py" ]; then
+        PYTHON_ENTRY="app.py"
+        log_msg "使用入口: app.py"
+    elif [ -f "app.pyz" ]; then
+        PYTHON_ENTRY="app.pyz"
+        log_msg "使用入口: app.pyz"
+    elif [ -f "app.pyc" ]; then
+        PYTHON_ENTRY="app.pyc"
+        log_msg "使用入口: app.pyc"
+    else
+        log_msg "找不到入口文件"
+        return 1
+    fi
+
+    python3 "$PYTHON_ENTRY" >> "$LOG_FILE" 2>&1 &
+
+    echo "$!" > "$PID_FILE"
+    log_msg "进程 PID = $!"
+    return 0
+}
+
+stop_process() {
+    log_msg "停止云资源..."
+
+    if [ -f "$PID_FILE" ]; then
+        pid=$(head -n 1 "$PID_FILE" | tr -d '[:space:]')
+        if kill -0 "$pid" 2>/dev/null; then
+            kill -TERM "$pid" >> "$LOG_FILE" 2>&1
+            local count=0
+            while kill -0 "$pid" 2>/dev/null && [ $count -lt 10 ]; do
+                sleep 1
+                count=$((count + 1))
+            done
+            if kill -0 "$pid" 2>/dev/null; then
+                kill -KILL "$pid"
+            fi
+        fi
+        rm -f "$PID_FILE"
+    fi
+    return 0
+}
+
+status() {
+    if [ -f "$PID_FILE" ]; then
+        pid=$(head -n 1 "$PID_FILE" | tr -d '[:space:]')
+        if kill -0 "$pid" 2>/dev/null; then
+            return 0
+        else
+            rm -f "$PID_FILE"
+        fi
+    fi
+    return 1
+}
+
+case $1 in
+    start)
+        start_process
+        exit 0
+        ;;
+    stop)
+        stop_process
+        exit 0
+        ;;
+    status)
+        if status; then
+            exit 0
+        else
+            exit 3
+        fi
+        ;;
+    *)
+        exit 1
+        ;;
+esac

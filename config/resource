@@ -1,0 +1,14 @@
+{
+  "data-share": {
+    "shares": [
+      {
+        "name": "cloud-resources",
+        "permission": {
+          "rw": [
+            "cloud-resources"
+          ]
+        }
+      }
+    ]
+  }
+}

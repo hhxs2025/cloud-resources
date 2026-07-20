@@ -1,0 +1,118 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="flex-between mb-10">
+    <h2 style="color: #1e293b; font-size: 17px; font-weight: 600; display: flex; align-items: center; gap: 6px;">
+        <span style="font-size: 19px;">🔑</span> 授权管理
+    </h2>
+    <a href="{{ url_for('admin_settings') }}" class="btn btn-outline btn-sm">返回设置</a>
+</div>
+
+<div class="card">
+    <h2 style="font-size: 15px; font-weight: 600; color: #1e293b; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid #e8edf2;">🖥️ 设备信息</h2>
+    <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+        <div style="background: #f8fafc; padding: 10px 14px; border-radius: 6px; font-family: monospace; font-size: 13px; word-break: break-all; border: 1px solid #e8edf2; flex: 1; min-width: 200px;">
+            <strong>机器码：</strong>
+            {% if machine_id %}
+                <span id="machine_id_text">{{ machine_id }}</span>
+            {% else %}
+                <span style="color: #ef4444;">无法读取</span>
+            {% endif %}
+        </div>
+        {% if machine_id %}
+            <button onclick="copyMachineId()" class="btn btn-primary btn-sm" style="flex-shrink: 0;">📋 复制</button>
+        {% endif %}
+    </div>
+    <div style="margin-top: 8px; font-size: 12px; color: #94a3b8;">
+        💡 复制机器码后，发送给开发者获取激活码
+    </div>
+</div>
+
+<div class="card">
+    <h2 style="font-size: 15px; font-weight: 600; color: #1e293b; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid #e8edf2;">📋 当前状态</h2>
+    {% if license and license.license_type != 'none' and license.is_valid %}
+        <div style="background: #ecfdf5; padding: 12px 16px; border-radius: 6px; border-left: 3px solid #22c55e;">
+            <p><strong>状态：</strong> ✅ 已激活</p>
+            <p><strong>套餐：</strong>
+                {% if license.license_type == 'trial' %}体验套餐（7天）{% elif license.license_type == 'annual' %}年套餐（365天）{% elif license.license_type == 'lifetime' %}终身套餐{% endif %}
+            </p>
+            {% if license.expires_at %}
+                <p><strong>到期时间：</strong> {{ license.expires_at.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+            {% else %}
+                <p><strong>到期时间：</strong> 永久有效</p>
+            {% endif %}
+            <p><strong>激活时间：</strong> {{ license.activated_at.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+        </div>
+    {% else %}
+        <div style="background: #fef2f2; padding: 12px 16px; border-radius: 6px; border-left: 3px solid #ef4444;">
+            <p><strong>状态：</strong> ❌ 未激活</p>
+            <p style="color: #7f1d1d; font-size: 13px;">品牌定制功能需要激活后方可使用</p>
+        </div>
+    {% endif %}
+</div>
+
+<div class="card">
+    <h2 style="font-size: 15px; font-weight: 600; color: #1e293b; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid #e8edf2;">🎫 输入激活码</h2>
+    <form method="POST" action="{{ url_for('admin_activate_license') }}">
+        <div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end;">
+            <div style="flex: 1; min-width: 200px;">
+                <label style="display: block; font-weight: 500; font-size: 13px; color: #475569; margin-bottom: 3px;">激活码</label>
+                <input type="text" name="activation_code" placeholder="例如：XXXX-XXXX-XXXX-XXXX" required style="width: 100%; padding: 7px 12px; border: 1px solid #d1d9e6; border-radius: 6px; font-size: 14px; font-family: monospace; text-transform: uppercase;">
+            </div>
+            <div style="min-width: 120px;">
+                <label style="display: block; font-weight: 500; font-size: 13px; color: #475569; margin-bottom: 3px;">套餐</label>
+                <select name="license_type" style="width: 100%; padding: 7px 12px; border: 1px solid #d1d9e6; border-radius: 6px; font-size: 14px;">
+                    <option value="trial">体验套餐（7天）</option>
+                    <option value="annual">年套餐（365天）</option>
+                    <option value="lifetime">终身套餐</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-success">激活</button>
+        </div>
+    </form>
+    <div style="margin-top: 8px; font-size: 12px; color: #94a3b8;">
+        💡 套餐价格：体验套餐 2元/周 · 年套餐 5元/年 · 终身套餐 10元
+    </div>
+</div>
+
+<script>
+function copyMachineId() {
+    var el = document.getElementById('machine_id_text');
+    if (!el) return;
+    var text = el.textContent.trim();
+    
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function() {
+            showToast('✅ 已复制到剪贴板');
+        }).catch(function() {
+            fallbackCopy(text);
+        });
+    } else {
+        fallbackCopy(text);
+    }
+}
+
+function fallbackCopy(text) {
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.cssText = 'position:fixed;opacity:0;';
+    document.body.appendChild(ta);
+    ta.select();
+    try {
+        document.execCommand('copy');
+        showToast('✅ 已复制到剪贴板');
+    } catch(e) {
+        showToast('❌ 复制失败，请手动复制');
+    }
+    document.body.removeChild(ta);
+}
+
+function showToast(msg) {
+    var t = document.createElement('div');
+    t.textContent = msg;
+    t.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#1e293b;color:#fff;padding:10px 24px;border-radius:6px;font-size:14px;z-index:9999;opacity:0;transition:opacity 0.3s;';
+    document.body.appendChild(t);
+    setTimeout(function() { t.style.opacity = '1'; }, 50);
+    setTimeout(function() { t.style.opacity = '0'; setTimeout(function() { t.remove(); }, 300); }, 2500);
+}
+</script>
+{% endblock %}

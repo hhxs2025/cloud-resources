@@ -1,0 +1,114 @@
+{% extends "layout.html" %}
+{% block content %}
+<div style="max-width: 420px; margin: 30px auto;">
+    <div class="card" style="padding: 30px 32px 32px; border-radius: 12px; background: rgba(255,255,255,0.85); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); box-shadow: 0 8px 32px rgba(0,0,0,0.06); border: 1px solid rgba(255,255,255,0.6);">
+        <h2 style="text-align: center; font-size: 20px; font-weight: 600; color: #1e293b; margin-bottom: 4px; letter-spacing: 0.5px;">登录</h2>
+        <p style="text-align: center; font-size: 13px; color: #94a3b8; margin-bottom: 24px;">云资源-共享管理</p>
+        <form method="POST">
+            <div style="margin-bottom: 16px;">
+                <label style="display: block; font-weight: 500; font-size: 13px; color: #475569; margin-bottom: 4px;">用户名</label>
+                <input type="text" name="username" placeholder="请输入用户名" required style="width: 100%; padding: 9px 14px; border: 1px solid #d1d9e6; border-radius: 8px; font-size: 14px; transition: border-color 0.2s, box-shadow 0.2s; background: rgba(255,255,255,0.7);">
+            </div>
+            <div style="margin-bottom: 24px;">
+                <label style="display: block; font-weight: 500; font-size: 13px; color: #475569; margin-bottom: 4px;">密码</label>
+                <input type="password" name="password" placeholder="请输入密码" required style="width: 100%; padding: 9px 14px; border: 1px solid #d1d9e6; border-radius: 8px; font-size: 14px; transition: border-color 0.2s, box-shadow 0.2s; background: rgba(255,255,255,0.7);">
+            </div>
+            <button type="submit" class="btn btn-primary" style="width: 100%; display: flex; justify-content: center; align-items: center; padding: 10px 18px; font-size: 15px; border-radius: 8px; background: linear-gradient(145deg, #2563eb, #1d4ed8); box-shadow: 0 4px 12px rgba(37,99,235,0.25); transition: transform 0.15s, box-shadow 0.2s; border: none; color: #fff; cursor: pointer;">
+                登 录
+            </button>
+        </form>
+        <div style="text-align: center; margin-top: 16px; font-size: 13px; color: #94a3b8;">
+            账号由管理员分配，不可自行注册
+        </div>
+    </div>
+</div>
+
+<!-- ===== 登录页背景样式 ===== -->
+<style>
+    .login-bg {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
+        background: #f0f4fa;
+        overflow: hidden;
+    }
+    .login-bg .circle {
+        position: absolute;
+        border-radius: 50%;
+        opacity: 0.35;
+        filter: blur(60px);
+        pointer-events: none;
+    }
+    .login-bg .c1 {
+        width: 320px;
+        height: 320px;
+        background: #bfd9f5;
+        top: -60px;
+        right: -40px;
+    }
+    .login-bg .c2 {
+        width: 280px;
+        height: 280px;
+        background: #d4c9f0;
+        bottom: -40px;
+        left: -30px;
+    }
+    .login-bg .c3 {
+        width: 200px;
+        height: 200px;
+        background: #c8e6e0;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        opacity: 0.2;
+    }
+    /* 悬停效果 — 输入框 */
+    input[type="text"]:hover,
+    input[type="password"]:hover {
+        border-color: #94a3b8;
+        background: rgba(255,255,255,0.9);
+    }
+    input[type="text"]:focus,
+    input[type="password"]:focus {
+        border-color: #2563eb;
+        box-shadow: 0 0 0 3px rgba(37,99,235,0.08);
+        background: #ffffff;
+        outline: none;
+    }
+    /* 按钮悬停 */
+    .btn-primary:hover {
+        background: linear-gradient(145deg, #1d4ed8, #1a3fa8) !important;
+        box-shadow: 0 6px 20px rgba(37,99,235,0.35) !important;
+        transform: translateY(-1px);
+    }
+    .btn-primary:active {
+        transform: scale(0.98);
+        box-shadow: 0 2px 8px rgba(37,99,235,0.2) !important;
+    }
+    /* 卡片悬停微动 */
+    .card {
+        transition: transform 0.2s, box-shadow 0.3s;
+    }
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 40px rgba(0,0,0,0.07) !important;
+    }
+    /* 移动端适配 */
+    @media (max-width: 480px) {
+        .login-bg .c1 { width: 180px; height: 180px; top: -30px; right: -20px; }
+        .login-bg .c2 { width: 160px; height: 160px; bottom: -20px; left: -10px; }
+        .login-bg .c3 { width: 120px; height: 120px; }
+        .card { padding: 24px 20px !important; }
+    }
+</style>
+
+<!-- ===== 背景层 ===== -->
+<div class="login-bg">
+    <div class="circle c1"></div>
+    <div class="circle c2"></div>
+    <div class="circle c3"></div>
+</div>
+{% endblock %}

@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>{{ config.site_name if config else '云资源' }}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, "PingFang SC", "Microsoft YaHei", "Helvetica Neue", sans-serif;
+            background: #f8fafc;
+            color: #1e293b;
+            min-height: 100vh;
+            padding: 16px;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+            overflow: hidden;
+            min-height: 88vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background: #ffffff;
+            border-bottom: 1px solid #e8edf2;
+            padding: 14px 28px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px 16px;
+            flex-shrink: 0;
+        }
+
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header-brand .logo {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .header-brand .logo img {
+            height: 32px;
+            width: auto;
+            max-width: 120px;
+            object-fit: contain;
+        }
+
+        .header-brand .logo svg {
+            width: 28px;
+            height: 28px;
+        }
+
+        .header-brand h1 {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1e293b;
+            letter-spacing: -0.3px;
+        }
+
+        .header-brand h1 span {
+            color: #2563eb;
+        }
+
+        .header-brand small {
+            font-size: 12px;
+            color: #94a3b8;
+            font-weight: 400;
+            margin-left: 4px;
+        }
+
+        .header-nav {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 4px 18px;
+            font-size: 14px;
+        }
+
+        .header-nav a {
+            color: #64748b;
+            padding: 4px 0;
+            border-bottom: 2px solid transparent;
+            transition: color 0.15s, border-color 0.15s;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+        }
+
+        .header-nav a svg {
+            width: 16px;
+            height: 16px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .header-nav a:hover {
+            color: #1e293b;
+        }
+
+        .header-nav a.active {
+            color: #1e293b;
+            border-bottom-color: #2563eb;
+        }
+
+        .main {
+            padding: 24px 28px 20px;
+            flex: 1;
+        }
+
+        .card {
+            background: #ffffff;
+            border-radius: 8px;
+            padding: 18px 22px;
+            margin-bottom: 16px;
+            border: 1px solid #e8edf2;
+            transition: border-color 0.15s;
+        }
+
+        .card:last-child {
+            margin-bottom: 0;
+        }
+
+        .card h2 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 10px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #e8edf2;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card h2 svg {
+            width: 18px;
+            height: 18px;
+            stroke: #2563eb;
+            fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .card p {
+            line-height: 1.7;
+            color: #475569;
+            font-size: 14px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 6px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.15s, opacity 0.15s;
+            text-align: center;
+            background: #e8edf2;
+            color: #1e293b;
+        }
+
+        .btn svg {
+            width: 14px;
+            height: 14px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .btn:hover {
+            opacity: 0.8;
+        }
+
+        .btn-primary {
+            background: #2563eb;
+            color: #ffffff;
+        }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+        }
+
+        .btn-success {
+            background: #22c55e;
+            color: #ffffff;
+        }
+
+        .btn-success:hover {
+            background: #16a34a;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: #ffffff;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        .btn-warning {
+            background: #f59e0b;
+            color: #ffffff;
+        }
+
+        .btn-warning:hover {
+            background: #d97706;
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: #1e293b;
+            border: 1px solid #d1d9e6;
+        }
+
+        .btn-outline:hover {
+            background: #f1f5f9;
+        }
+
+        .btn-sm {
+            padding: 4px 12px;
+            font-size: 12px;
+        }
+
+        .btn-sm svg {
+            width: 12px;
+            height: 12px;
+        }
+
+        input,
+        select,
+        textarea {
+            font-family: inherit;
+            font-size: 14px;
+            padding: 7px 12px;
+            border: 1px solid #d1d9e6;
+            border-radius: 6px;
+            background: #ffffff;
+            width: 100%;
+            max-width: 100%;
+            color: #1e293b;
+            transition: border-color 0.15s;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.08);
+        }
+
+        label {
+            font-weight: 500;
+            font-size: 13px;
+            color: #475569;
+            display: block;
+            margin-bottom: 3px;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            min-width: 480px;
+        }
+
+        th,
+        td {
+            padding: 8px 10px;
+            text-align: left;
+            border-bottom: 1px solid #e8edf2;
+        }
+
+        th {
+            background: #f8fafc;
+            font-weight: 600;
+            color: #1e293b;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        tr:hover td {
+            background: #fafbfc;
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            background: #e8edf2;
+            color: #1e293b;
+            margin: 2px 4px 2px 0;
+        }
+
+        .alert {
+            padding: 10px 16px;
+            border-radius: 6px;
+            margin-bottom: 12px;
+            font-size: 13px;
+            border-left: 3px solid transparent;
+        }
+
+        .alert-success {
+            background: #ecfdf5;
+            border-left-color: #22c55e;
+            color: #065f46;
+        }
+
+        .alert-danger {
+            background: #fef2f2;
+            border-left-color: #ef4444;
+            color: #7f1d1d;
+        }
+
+        .alert-warning {
+            background: #fffbeb;
+            border-left-color: #f59e0b;
+            color: #78350f;
+        }
+
+        .alert-info {
+            background: #eff6ff;
+            border-left-color: #2563eb;
+            color: #1e3a5f;
+        }
+
+        .flex {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .flex-between {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .mt-10 {
+            margin-top: 10px;
+        }
+
+        .mb-10 {
+            margin-bottom: 10px;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .text-muted {
+            color: #94a3b8;
+            font-size: 13px;
+        }
+
+        .text-small {
+            font-size: 12px;
+        }
+
+        .footer {
+            padding: 12px 28px;
+            border-top: 1px solid #e8edf2;
+            text-align: center;
+            color: #94a3b8;
+            font-size: 12px;
+            background: #fafbfc;
+            flex-shrink: 0;
+        }
+
+        .footer .dev {
+            color: #1e293b;
+            font-weight: 500;
+        }
+
+        .footer a {
+            color: #2563eb;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 14px;
+        }
+
+        @media (max-width: 720px) {
+            body {
+                padding: 10px;
+            }
+
+            .header {
+                padding: 10px 16px;
+                flex-direction: column;
+                align-items: stretch;
+                gap: 6px;
+            }
+
+            .header-brand h1 {
+                font-size: 18px;
+            }
+
+            .header-nav {
+                font-size: 13px;
+                gap: 2px 12px;
+                justify-content: center;
+            }
+
+            .main {
+                padding: 16px 14px 14px;
+            }
+
+            .card {
+                padding: 14px;
+            }
+
+            .grid-3 {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            table {
+                font-size: 12px;
+                min-width: 300px;
+            }
+
+            th,
+            td {
+                padding: 6px 8px;
+            }
+
+            .footer {
+                padding: 10px 16px;
+                font-size: 11px;
+            }
+        }
+
+        @media (max-width: 420px) {
+            body {
+                padding: 6px;
+            }
+
+            .header-nav {
+                gap: 2px 8px;
+                font-size: 12px;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .grid-3 {
+                grid-template-columns: 1fr;
+            }
+
+            .card {
+                padding: 10px;
+            }
+
+            .main {
+                padding: 10px;
+            }
+
+            .header-brand h1 {
+                font-size: 16px;
+            }
+
+            .header-brand .logo img {
+                max-height: 28px;
+            }
+        }
+
+        /* 收款码弹窗遮罩 */
+        .payment-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.4);
+            z-index: 99999;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .payment-overlay.show {
+            display: flex;
+        }
+
+        .payment-box {
+            background: white;
+            border-radius: 12px;
+            padding: 28px;
+            max-width: 340px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            position: relative;
+        }
+
+        .payment-box .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 16px;
+            font-size: 22px;
+            cursor: pointer;
+            color: #94a3b8;
+            background: none;
+            border: none;
+        }
+
+        .payment-box .close-btn:hover {
+            color: #1e293b;
+        }
+
+        .payment-box h4 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 4px;
+        }
+
+        .payment-box .sub {
+            font-size: 13px;
+            color: #64748b;
+            margin-bottom: 12px;
+        }
+
+        .payment-box img {
+            max-width: 100%;
+            border-radius: 8px;
+            border: 1px solid #e8edf2;
+        }
+
+        .payment-box .fallback {
+            display: none;
+            padding: 20px;
+            background: #f8fafc;
+            border-radius: 8px;
+            color: #94a3b8;
+            font-size: 13px;
+        }
+
+        .payment-box .fallback code {
+            background: #e8edf2;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body>
+
+    <div class="container">
+
+        <header class="header">
+            <div class="header-brand">
+                <div class="logo">
+                    {% if config and config.custom_logo %}
+                    <img src="/{{ config.custom_logo }}" alt="{{ config.site_name }}">
+                    {% else %}
+                    <svg viewBox="0 0 24 24">
+                        <path d="M12 2L2 7l10 5 10-5-10-5z" />
+                        <path d="M2 17l10 5 10-5" />
+                        <path d="M2 12l10 5 10-5" />
+                    </svg>
+                    {% endif %}
+                    <h1>{{ config.site_name if config else '云资源' }}</h1>
+                </div>
+                <small>{{ config.site_intro if config else '' }}</small>
+            </div>
+            <nav class="header-nav">
+                <a href="/" class="{% if request.path == '/' %}active{% endif %}">
+                    <svg viewBox="0 0 24 24">
+                        <path
+                            d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1" />
+                    </svg>
+                    首页
+                </a>
+                <a href="/resources" class="{% if request.path.startswith('/resources') %}active{% endif %}">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M3 7a2 2 0 012-2h4a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V7z" />
+                        <path d="M13 7a2 2 0 012-2h4a2 2 0 012 2v10a2 2 0 01-2 2h-4a2 2 0 01-2-2V7z" />
+                    </svg>
+                    资源
+                </a>
+                <!-- ===== 📖 教程按钮 ===== -->
+                <a href="javascript:void(0)" onclick="showTutorial()">
+                    <svg viewBox="0 0 24 24">
+                        <path
+                            d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                    </svg>
+                    教程
+                </a>
+                <!-- ===== 教程按钮结束 ===== -->
+                {% if current_user.is_authenticated %}
+                {% if current_user.is_admin %}
+                <a href="/admin" class="{% if request.path.startswith('/admin') %}active{% endif %}">
+                    <svg viewBox="0 0 24 24">
+                        <path
+                            d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    </svg>
+                    管理
+                </a>
+                {% endif %}
+                <a href="/logout">
+                    <svg viewBox="0 0 24 24">
+                        <path
+                            d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    </svg>
+                    退出
+                </a>
+                {% else %}
+                <a href="/login">
+                    <svg viewBox="0 0 24 24">
+                        <path
+                            d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+                    </svg>
+                    登录
+                </a>
+                {% endif %}
+            </nav>
+        </header>
+
+        <main class="main">
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+            {% endwith %}
+
+            {% block content %}{% endblock %}
+
+        </main>
+
+        <footer class="footer">
+            <span>© 2026
+                {% if config and config.hide_dev_info %}
+                <span class="dev">{{ config.site_name if config else '云资源' }}</span>
+                {% elif config and config.custom_dev_info %}
+                <span class="dev">{{ config.custom_dev_info }}</span>
+                {% else %}
+                <span class="dev">{{ config.site_name if config else '云资源' }}</span> · 开发者：晦华先生
+                {% endif %}
+            </span>
+        </footer>
+
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- ===== 📖教程 + 增值业务 + 常见问题 模态框 ===== -->
+    <!-- ============================================================ -->
+    <div id="tutorialModal"
+        style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 9999; align-items: center; justify-content: center;">
+        <div
+            style="background: white; border-radius: 8px; padding: 30px; max-width: 620px; width: 92%; max-height: 85vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <h3 style="font-size: 18px; font-weight: 600; color: #1e293b;">📖 使用教程 &amp; 常见问题</h3>
+                <button onclick="closeTutorial()"
+                    style="background: none; border: none; font-size: 24px; cursor: pointer; color: #94a3b8;">&times;</button>
+            </div>
+            <div style="line-height: 1.8; color: #475569; font-size: 14px;">
+
+                <!-- ===== 使用教程 ===== -->
+                <p><strong>1. 登录与账号</strong><br>默认账号：admin / 密码：admin123<br>首次登录后请在管理后台修改密码</p>
+                <p><strong>2. 添加资源</strong><br>管理后台 → 资源管理 → 添加资源<br>填写标题、选择分类、上传文件、添加标签（可选）、填写描述</p>
+                <p><strong>3. 管理资源</strong><br>管理后台 → 资源管理 → 编辑/删除已有资源</p>
+                <p><strong>4. 用户管理</strong><br>管理后台 → 用户管理 → 添加/禁用/删除用户<br>可重置用户密码（重置后为 123456）</p>
+                <p><strong>5. 存储路径设置</strong><br>安装时在向导中设置，安装后可在 应用中心 → 云资源 → 设置 → 配置 中修改<br>修改后需在 应用设置 → 文件夹路径
+                    中添加新目录，然后重启应用生效</p>
+                <p><strong>6. 站点设置</strong><br>管理后台 → 站点设置 → 修改站点名称、简介、关于我们</p>
+
+                <!-- ===== 增值业务（链接 + 收款码悬停/点击） ===== -->
+                <p style="margin-top:12px; padding-top:12px; border-top:2px solid #e8edf2;">
+                    <strong style="color: #2563eb; cursor: pointer;" id="valueAddLink"
+                        onmouseenter="showPaymentOverlay()" onclick="togglePaymentOverlay()">
+                        ⭐增值业务
+                    </strong>
+                    <span style="font-size:13px; color:#64748b; margin-left:6px;">（点击或悬停查看收款码）</span>
+                    <br>
+                    • <strong>品牌定制</strong>：自定义 LOGO、隐藏开发者信息、自定义开发者信息<br>
+                    • <strong>授权激活</strong>：在「管理后台 → 站点设置 → 授权管理」中输入激活码<br>
+                    • <strong>套餐说明</strong>：体验套餐（7天） / 年套餐（365天） / 终身套餐<br>
+                    • <strong>获取激活码</strong>：复制机器码发送给开发者 <strong>晦华先生 2303537063@qq.com</strong>
+                </p>
+
+                <!-- ===== 常见问题 ===== -->
+                <p style="margin-top:12px; padding-top:12px; border-top:2px solid #e8edf2;">
+                    <strong style="color: #2563eb;">❓常见问题</strong>
+                </p>
+
+                <p><strong>📝描述支持哪些 Markdown 标签？</strong><br>
+                    • 标题：<code># 一级标题</code> 到 <code>###### 六级标题</code><br>
+                    • 加粗：<code>**加粗文字**</code><br>
+                    • 斜体：<code>*斜体文字*</code><br>
+                    • 列表：<code>- 无序列表</code> 或 <code>1. 有序列表</code><br>
+                    • 链接：<code>[文字](https://链接)</code><br>
+                    • 图片：<code>![图片描述](/图片名.png)</code><br>
+                    • 代码：<code>`行内代码`</code> 或 <code>```代码块```</code><br>
+                    • 引用：<code>&gt; 引用内容</code>
+                </p>
+
+                <p><strong>🌐关于我们（首页）支持哪些 HTML 标签？</strong><br>
+                    • 标题：<code>&lt;h1&gt;...&lt;/h1&gt;</code> 到 <code>&lt;h6&gt;...&lt;/h6&gt;</code><br>
+                    • 段落：<code>&lt;p&gt;...&lt;/p&gt;</code><br>
+                    • 加粗：<code>&lt;strong&gt;...&lt;/strong&gt;</code> 或 <code>&lt;b&gt;...&lt;/b&gt;</code><br>
+                    • 斜体：<code>&lt;em&gt;...&lt;/em&gt;</code> 或 <code>&lt;i&gt;...&lt;/i&gt;</code><br>
+                    • 列表：<code>&lt;ul&gt;&lt;li&gt;...&lt;/li&gt;&lt;/ul&gt;</code>（无序）或
+                    <code>&lt;ol&gt;&lt;li&gt;...&lt;/li&gt;&lt;/ol&gt;</code>（有序）<br>
+                    • 链接：<code>&lt;a href="https://链接"&gt;文字&lt;/a&gt;</code><br>
+                    • 图片：<code>&lt;img src="/图片名.png" style="max-width:100%;"&gt;</code><br>
+                    • 代码：<code>&lt;code&gt;...&lt;/code&gt;</code><br>
+                    • 引用：<code>&lt;blockquote&gt;...&lt;/blockquote&gt;</code>
+                </p>
+
+                <p><strong>🖼️首页或资源详情页图片不显示怎么办？</strong><br>
+                    ① 确认图片已放入 <strong>上传目录</strong>（安装时设置，默认 <code>/vol1/@appcenter/cloud-resources/uploads/</code>）<br>
+                    ② 图片路径使用 <code>/图片名.png</code>（不要加 <code>uploads/</code> 前缀）<br>
+                    ③ 检查图片文件名是否包含中文或特殊字符（建议用英文+数字）<br>
+                    ④ 确认图片格式为 <code>.png .jpg .jpeg .gif .svg .webp .ico .bmp .tiff</code><br>
+                    ⑤ 刷新页面（Ctrl+F5 强制刷新）
+                </p>
+
+                <p><strong>📂上传图片或资源，在应用更新后显示/下载出问题怎么办？</strong><br>
+                    • 应用更新时，<strong>上传目录和数据库不会被覆盖</strong>，数据安全<br>
+                    • 如果更新后资源不显示，检查 <strong>上传目录路径</strong> 是否变更<br>
+                    • 如果下载报错，检查 <strong>文件是否被误删除</strong> 或 <strong>权限是否正常</strong><br>
+                    • 建议：更新前 <strong>备份数据库</strong>（<code>/var/apps/cloud-resources/var/resource.db</code>）<br>
+                    • 如遇问题，在「管理后台 → 资源管理」重新编辑资源，确认文件路径正确
+                </p>
+
+                <p
+                    style="margin-top:12px; padding-top:12px; border-top:1px solid #e8edf2; font-size:13px; color: #94a3b8;">
+                    更多问题请联系开发者：<strong>晦华先生 2303537063@qq.com</strong>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- ===== 收款码弹窗(独立遮罩)===== -->
+    <!-- ============================================================ -->
+    <div id="paymentOverlay" class="payment-overlay" onclick="closePaymentOverlay(event)">
+        <div class="payment-box" onclick="event.stopPropagation();">
+            <button class="close-btn" onclick="closePaymentOverlay()">&times;</button>
+            <h4>💝支持开发者</h4>
+            <p class="sub">感谢您的支持，扫码赞赏 </p>
+            <img id="paymentQrImg" src="/static/paycode.png" alt="收款码"
+                onerror="this.style.display='none'; document.getElementById('paymentFallback').style.display='block';">
+            <div id="paymentFallback" class="fallback">
+                ⚠️收款码图片未找到<br>
+            </div>
+            <p style="font-size:12px; color:#94a3b8; margin-top:8px;">点击空白处关闭</p>
+        </div>
+    </div>
+
+    <script>
+        (function () {
+            var themeMap = { '10': 'light', '20': 'dark' };
+            var theme = themeMap[localStorage.getItem('fnos-theme-mode')] || 'light';
+            if (theme === 'dark') {
+                document.body.style.background = '#0f172a';
+                var container = document.querySelector('.container');
+                if (container) container.style.background = '#1e293b';
+                document.querySelectorAll('.card').forEach(function (el) {
+                    el.style.background = '#1e293b';
+                    el.style.borderColor = '#334155';
+                });
+                document.querySelectorAll('.card h2').forEach(function (el) {
+                    el.style.color = '#e8edf2';
+                    el.style.borderColor = '#334155';
+                });
+                document.querySelectorAll('td').forEach(function (el) {
+                    el.style.color = '#c8d0d8';
+                    el.style.borderColor = '#334155';
+                });
+                document.querySelectorAll('th').forEach(function (el) {
+                    el.style.background = '#1e293b';
+                    el.style.color = '#e8edf2';
+                    el.style.borderColor = '#334155';
+                });
+                document.querySelectorAll('.footer').forEach(function (el) {
+                    el.style.background = '#0f172a';
+                    el.style.borderColor = '#334155';
+                    el.style.color = '#94a3b8';
+                });
+                document.querySelectorAll('.header').forEach(function (el) {
+                    el.style.background = '#1e293b';
+                    el.style.borderColor = '#334155';
+                });
+                document.querySelectorAll('.header-brand h1').forEach(function (el) {
+                    el.style.color = '#e8edf2';
+                });
+                document.querySelectorAll('.header-nav a').forEach(function (el) {
+                    el.style.color = '#94a3b8';
+                });
+                document.querySelectorAll('.header-nav a.active').forEach(function (el) {
+                    el.style.color = '#e8edf2';
+                    el.style.borderBottomColor = '#2563eb';
+                });
+                document.querySelectorAll('.header-nav a:hover').forEach(function (el) {
+                    el.style.color = '#e8edf2';
+                });
+                document.querySelectorAll('.alert-success').forEach(function (el) {
+                    el.style.background = '#064e3b';
+                    el.style.color = '#86efac';
+                });
+                document.querySelectorAll('.alert-danger').forEach(function (el) {
+                    el.style.background = '#7f1d1d';
+                    el.style.color = '#fca5a5';
+                });
+                document.querySelectorAll('.alert-warning').forEach(function (el) {
+                    el.style.background = '#78350f';
+                    el.style.color = '#fcd34d';
+                });
+                document.querySelectorAll('.alert-info').forEach(function (el) {
+                    el.style.background = '#1e3a5f';
+                    el.style.color = '#93c5fd';
+                });
+                var modal = document.getElementById('tutorialModal');
+                if (modal) {
+                    var modalContent = modal.querySelector('div');
+                    if (modalContent) {
+                        modalContent.style.background = theme === 'dark' ? '#1e293b' : 'white';
+                    }
+                    var modalTitle = modal.querySelector('h3');
+                    if (modalTitle) {
+                        modalTitle.style.color = theme === 'dark' ? '#e8edf2' : '#1e293b';
+                    }
+                    var modalText = modal.querySelector('div[style*="line-height"]');
+                    if (modalText) {
+                        modalText.style.color = theme === 'dark' ? '#c8d0d8' : '#475569';
+                    }
+                }
+                var paymentBox = document.querySelector('.payment-box');
+                if (paymentBox) {
+                    paymentBox.style.background = theme === 'dark' ? '#1e293b' : 'white';
+                }
+                var paymentTitle = document.querySelector('.payment-box h4');
+                if (paymentTitle) {
+                    paymentTitle.style.color = theme === 'dark' ? '#e8edf2' : '#1e293b';
+                }
+            }
+        })();
+
+        // ===== 教程模态框 =====
+        function showTutorial() {
+            document.getElementById('tutorialModal').style.display = 'flex';
+        }
+        function closeTutorial() {
+            document.getElementById('tutorialModal').style.display = 'none';
+        }
+        document.getElementById('tutorialModal').addEventListener('click', function (e) {
+            if (e.target === this) closeTutorial();
+        });
+
+        // ===== 收款码弹窗 =====
+        var paymentTimer = null;
+
+        function showPaymentOverlay() {
+            clearTimeout(paymentTimer);
+            paymentTimer = setTimeout(function () {
+                document.getElementById('paymentOverlay').classList.add('show');
+            }, 300);
+        }
+
+        function togglePaymentOverlay() {
+            var overlay = document.getElementById('paymentOverlay');
+            if (overlay.classList.contains('show')) {
+                overlay.classList.remove('show');
+            } else {
+                overlay.classList.add('show');
+            }
+        }
+
+        function closePaymentOverlay(event) {
+            if (event && event.target && !event.target.closest('.payment-box')) {
+                document.getElementById('paymentOverlay').classList.remove('show');
+            } else if (!event) {
+                document.getElementById('paymentOverlay').classList.remove('show');
+            }
+        }
+
+        // 点击收款码弹窗外部关闭
+        document.getElementById('paymentOverlay').addEventListener('click', function (e) {
+            if (e.target === this) {
+                this.classList.remove('show');
+            }
+        });
+    </script>
+    {% block extra_js %}{% endblock %}
+
+</body>
+
+</html>

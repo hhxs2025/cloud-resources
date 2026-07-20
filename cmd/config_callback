@@ -1,0 +1,28 @@
+#!/bin/bash
+
+# ============================================
+# 定义日志函数
+# ============================================
+LOG_FILE="${TRIM_PKGVAR}/info.log"
+
+log_msg() {
+    echo "$(date '+%Y-%m-%d %H:%M:%S') - $1" >> "$LOG_FILE"
+}
+
+# ============================================
+# 只处理存储路径变更
+# ============================================
+WIZARD_UPLOAD_PATH="${wizard_upload_path:-}"
+
+if [ -n "$WIZARD_UPLOAD_PATH" ]; then
+    mkdir -p "$WIZARD_UPLOAD_PATH"
+    CONFIG_FILE="${TRIM_PKGVAR}/app_config.json"
+    cat > "$CONFIG_FILE" << EOF
+{
+    "upload_path": "$WIZARD_UPLOAD_PATH"
+}
+EOF
+    log_msg "存储路径已更新: $WIZARD_UPLOAD_PATH"
+fi
+
+exit 0

@@ -1,0 +1,17 @@
+appname=cloud-resources
+version=1.0.5
+display_name=云资源
+desc="""<h2>云资源</h2><p>这是一款便捷的资源下载站点搭建工具，支持添加、下载资源，支持资源的分类、标签管理，支持用户管理，站点信息自定义等。</p><hr><h3> 更新说明</h3><p>1.首页编辑及资源详情编辑新增Markdown格式支持,实现HTML、Markdown双支持；</p><p>2.管理后台及资源管理布局调整优化；</p><p>3.新增增值业务：通过<strong>教程</strong>可开通增值业务,且开通后可免费享受后续升级版本新增的其他增值业务</p><p>4.新增批量添加资源功能及添加文件夹功能。</p>"""
+platform=x86
+source=thirdparty
+maintainer=晦华先生
+maintainer_url=https://gitee.com/hhxs2025/cloud-resources/blob/master/README.md
+distributor=晦华先生
+distributor_url=https://cr.hhxs2025.top:1666
+ctl_stop=true
+desktop_uidir=ui
+desktop_applaunchname=cloud-resources.Application
+service_port=5665
+checkport=true
+disable_authorization_path=false
+checksum=feed9ad8311d4b1587a3e1196dd123f5

@@ -1,0 +1,7 @@
+{
+  "username": "cloud-resources",
+  "groupname": "cloud-resources",
+  "defaults": {
+    "run-as": "package"
+  }
+}
