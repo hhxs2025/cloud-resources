@@ -14,4 +14,4 @@ desktop_applaunchname      = cloud-resources.Application
 service_port               = 5665
 checkport                  = true
 disable_authorization_path = false
-checksum                   = 36a900cc84778c5f0567557a7aeb0487
+checksum                   = 3f3eb190b59e91e957526a36da92e499

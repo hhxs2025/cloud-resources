@@ -38,27 +38,5 @@
         "initValue": "/vol1/@appshare/cloud-resources"
       }
     ]
-  },
-  {
-    "stepTitle": "端口设置",
-    "items": [
-      {
-        "type": "tips",
-        "field": "wizard_default",
-        "label": "示例项",
-        "rules": [],
-        "options": [],
-        "helpText": "请设置好\"服务端口\"，注意避开已占用端口。"
-      },
-      {
-        "type": "text",
-        "field": "wizard_port",
-        "label": "服务端口",
-        "rules": [],
-        "options": [],
-        "helpText": "此处可以自定义你想设置的端口号",
-        "initValue": "5665"
-      }
-    ]
   }
 ]
