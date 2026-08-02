@@ -48,7 +48,7 @@
 | 文件夹导入 | 支持选择整个文件夹，自动导入其中所有文件 |
 | 标题前缀 | 批量上传时可设置标题前缀，自动拼接文件名 |
 
-[1.0.5版下载按钮](https://gitee.com/hhxs2025/cloud-resources/releases/download/1.0.5/cloud-resources-1.0.5-x86-so.fpk)  
+[1.0.5版下载按钮](https://gitee.com/hhxs2025/cloud-resources/releases/download/1.0.5/cloud-resources.fpk)  
 
 
 ## 🔐三、使用说明  
