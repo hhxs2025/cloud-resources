@@ -37,4 +37,21 @@
         <button type="submit" class="btn btn-primary">保存</button>
     </form>
 </div>
+
+<!-- ===== 替换文件（1.1.0 新增） ===== -->
+<div class="card" style="border-top: 3px solid #f59e0b;">
+    <h2 style="font-size: 15px; font-weight: 600; color: #1e293b; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid #e8edf2; display: flex; align-items: center; gap: 8px;">
+        <span style="font-size: 18px;">🔄</span> 替换文件
+    </h2>
+    <div style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-bottom: 10px;">
+        <span style="font-size: 13px; color: #64748b;">当前文件：</span>
+        <span style="font-size: 14px; font-weight: 500; color: #1e293b;">{{ resource.file_name }}</span>
+        <span style="font-size: 12px; color: #94a3b8;">（{{ resource.file_size|filesizeformat }}）</span>
+    </div>
+    <form method="POST" action="{{ url_for('admin_replace_file', resource_id=resource.id) }}" enctype="multipart/form-data" style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
+        <input type="file" name="file" required style="padding: 4px; font-size: 13px;">
+        <button type="submit" class="btn btn-warning btn-sm">🔄 替换</button>
+        <span style="font-size: 12px; color: #94a3b8;">⚠️ 替换后旧文件将被删除，其他信息不变</span>
+    </form>
+</div>
 {% endblock %}

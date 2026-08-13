@@ -15,17 +15,15 @@ TRIM_PKGVAR = os.environ.get('TRIM_PKGVAR')
 
 if not TRIM_PKGVAR:
     # 如果环境变量没有，从应用路径推断
-    # appname 从目录名获取
     APP_ROOT = os.path.dirname(CURRENT_DIR)  # 应用根目录
     APP_NAME = os.path.basename(APP_ROOT)
     
     # 尝试从存储池路径推断 @appdata
-    # 如果应用在 /vol1/@appcenter/xxx，数据在 /vol1/@appdata/xxx/var
+    # 1.1.0 修正：去掉 /var，保持与 1.0.5 实际运行路径一致
     if '/@appcenter/' in APP_ROOT:
         vol_path = APP_ROOT.split('/@appcenter/')[0]
-        TRIM_PKGVAR = os.path.join(vol_path, '@appdata', APP_NAME, 'var')
+        TRIM_PKGVAR = os.path.join(vol_path, '@appdata', APP_NAME)  # 不加 /var
     else:
-        # 兜底：当前目录上级的 data
         TRIM_PKGVAR = os.path.join(APP_ROOT, 'data')
     
     os.environ['TRIM_PKGVAR'] = TRIM_PKGVAR
@@ -35,7 +33,7 @@ os.makedirs(TRIM_PKGVAR, exist_ok=True)
 print(f"数据目录: {TRIM_PKGVAR}")
 
 # ============================================
-# 导入 app 模块
+# 导入 app 模块（app.so）
 # ============================================
 try:
     import app

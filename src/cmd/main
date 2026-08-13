@@ -1,126 +1,180 @@
 #!/bin/bash
+# 初始日志路径（如果TRIM_PKGVAR 未设置，先推断）
+if [ -z "$TRIM_PKGVAR" ]; then
+    SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+    APP_ROOT="$(dirname "$SCRIPT_DIR")"
+    APP_NAME="$(basename "$APP_ROOT")"
+    VOL_PATH="$(echo "$APP_ROOT" | cut -d'/' -f1-2)"
+    TRIM_PKGVAR="${VOL_PATH}/@appdata/${APP_NAME}"
+    export TRIM_PKGVAR
+fi
 
 LOG_FILE="${TRIM_PKGVAR}/info.log"
 PID_FILE="${TRIM_PKGVAR}/app.pid"
 
+# ============================================
+# 日志函数
+# ============================================
 log_msg() {
     echo "$(date '+%Y-%m-%d %H:%M:%S') - $1" >> "$LOG_FILE"
 }
 
-start_process() {
-    if status; then
-        return 0
-    fi
-
-    # 固定代码路径（代码在 @appcenter 下）
-    CODE_DIR="/vol1/@appcenter/cloud-resources/server"
-
-    if [ ! -d "$CODE_DIR" ]; then
-        log_msg "代码目录不存在: $CODE_DIR"
-        return 1
-    fi
-
-    # 如果 TRIM_APPDEST 没设，用代码目录
-    if [ -z "${TRIM_APPDEST}" ]; then
-        export TRIM_APPDEST="$CODE_DIR"
-    fi
-
-    log_msg "启动云资源..."
-    log_msg "TRIM_APPDEST=${TRIM_APPDEST}"
-    log_msg "代码目录: ${CODE_DIR}"
-
-    WIZARD_PORT="${wizard_port:-${TRIM_SERVICE_PORT:-5665}}"
-    WIZARD_UPLOAD_PATH="${wizard_upload_path:-${TRIM_APPDEST}/uploads}"
-
-    log_msg "使用端口: ${WIZARD_PORT}"
-    log_msg "使用上传目录: ${WIZARD_UPLOAD_PATH}"
-
-    mkdir -p "${WIZARD_UPLOAD_PATH}"
-    mkdir -p "${TRIM_PKGVAR}"
-
-    cd "$CODE_DIR" || {
-        log_msg "无法进入代码目录: $CODE_DIR"
-        return 1
-    }
-
-    export TRIM_APPDEST="$CODE_DIR"
-    export TRIM_PKGVAR="${TRIM_PKGVAR}"
-    export TRIM_SERVICE_PORT="${WIZARD_PORT}"
-    export wizard_upload_path="${WIZARD_UPLOAD_PATH}"
-    export PYTHONPATH="${CODE_DIR}/vendor:${PYTHONPATH}"
-
-    if [ -f "start.py" ]; then
-        PYTHON_ENTRY="start.py"
-        log_msg "使用入口: start.py"
-    elif [ -f "app.py" ]; then
-        PYTHON_ENTRY="app.py"
-        log_msg "使用入口: app.py"
-    elif [ -f "app.pyz" ]; then
-        PYTHON_ENTRY="app.pyz"
-        log_msg "使用入口: app.pyz"
-    elif [ -f "app.pyc" ]; then
-        PYTHON_ENTRY="app.pyc"
-        log_msg "使用入口: app.pyc"
-    else
-        log_msg "找不到入口文件"
-        return 1
-    fi
-
-    python3 "$PYTHON_ENTRY" >> "$LOG_FILE" 2>&1 &
-
-    echo "$!" > "$PID_FILE"
-    log_msg "进程 PID = $!"
-    return 0
-}
-
-stop_process() {
-    log_msg "停止云资源..."
-
-    if [ -f "$PID_FILE" ]; then
-        pid=$(head -n 1 "$PID_FILE" | tr -d '[:space:]')
-        if kill -0 "$pid" 2>/dev/null; then
-            kill -TERM "$pid" >> "$LOG_FILE" 2>&1
-            local count=0
-            while kill -0 "$pid" 2>/dev/null && [ $count -lt 10 ]; do
-                sleep 1
-                count=$((count + 1))
-            done
-            if kill -0 "$pid" 2>/dev/null; then
-                kill -KILL "$pid"
-            fi
-        fi
-        rm -f "$PID_FILE"
-    fi
-    return 0
-}
-
+# ============================================
+# 状态检查（必须在 start_process 之前）
+# ============================================
 status() {
     if [ -f "$PID_FILE" ]; then
-        pid=$(head -n 1 "$PID_FILE" | tr -d '[:space:]')
-        if kill -0 "$pid" 2>/dev/null; then
+        pid=$(head -n 1 "$PID_FILE" 2>/dev/null | tr -d '[:space:]')
+        if [ -n "$pid" ] && kill -0 "$pid" 2>/dev/null; then
             return 0
         else
             rm -f "$PID_FILE"
+            return 3
         fi
     fi
-    return 1
+    return 3
 }
 
-case $1 in
+# ============================================
+# 启动函数
+# ============================================
+start_process() {
+    if status >/dev/null 2>&1; then
+        log_msg "应用已在运行"
+        return 0
+    fi
+
+    log_msg "========== 启动 =========="
+
+    # ---------- 1. 获取 TRIM_APPDEST ----------
+    if [ -z "$TRIM_APPDEST" ]; then
+        SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+        TRIM_APPDEST="$(dirname "$SCRIPT_DIR")"
+        export TRIM_APPDEST
+        log_msg "TRIM_APPDEST 未注入，自动推断: $TRIM_APPDEST"
+    else
+        log_msg "TRIM_APPDEST 已注入: $TRIM_APPDEST"
+    fi
+
+    # ---------- 2. 获取 TRIM_PKGVAR ----------
+    if [ -z "$TRIM_PKGVAR" ]; then
+        APP_NAME="$(basename "$TRIM_APPDEST")"
+        VOL_PATH="$(echo "$TRIM_APPDEST" | cut -d'/' -f1-2)"
+        TRIM_PKGVAR="${VOL_PATH}/@appdata/${APP_NAME}"
+        export TRIM_PKGVAR
+        log_msg "TRIM_PKGVAR 未注入，自动推断: $TRIM_PKGVAR"
+    else
+        log_msg "TRIM_PKGVAR 已注入: $TRIM_PKGVAR"
+    fi
+
+    # ---------- 3. 确保数据目录存在 ----------
+    mkdir -p "$TRIM_PKGVAR"
+    log_msg "数据目录: $TRIM_PKGVAR"
+
+    # ---------- 4. 代码目录 ----------
+    CODE_DIR="${TRIM_APPDEST}/server"
+    if [ ! -d "$CODE_DIR" ]; then
+        log_msg "错误: 代码目录不存在: $CODE_DIR"
+        return 1
+    fi
+    log_msg "代码目录: $CODE_DIR"
+
+    # ---------- 5. 端口和上传目录 ----------
+    WIZARD_PORT="${TRIM_SERVICE_PORT:-5665}"
+    WIZARD_UPLOAD_PATH="${wizard_upload_path:-${TRIM_PKGVAR}/uploads}"
+    mkdir -p "$WIZARD_UPLOAD_PATH"
+    log_msg "端口: $WIZARD_PORT"
+    log_msg "上传目录: $WIZARD_UPLOAD_PATH"
+
+    # ---------- 6. 进入代码目录 ----------
+    cd "$CODE_DIR" || {
+        log_msg "错误: 无法进入代码目录: $CODE_DIR"
+        return 1
+    }
+
+    # ---------- 7. 设置 PYTHONPATH ----------
+    if [ -d "${CODE_DIR}/vendor" ]; then
+        export PYTHONPATH="${CODE_DIR}/vendor:${PYTHONPATH}"
+        log_msg "PYTHONPATH: $PYTHONPATH"
+    else
+        log_msg "警告: vendor 目录不存在"
+    fi
+
+    # ---------- 8. 传递环境变量 ----------
+    export wizard_upload_path="$WIZARD_UPLOAD_PATH"
+
+    # ---------- 9. 检查入口文件 start.py ----------
+    if [ ! -f "start.py" ]; then
+        log_msg "错误: start.py 不存在"
+        return 1
+    fi
+
+    log_msg "入口文件: start.py"
+    python3 start.py >> "$LOG_FILE" 2>&1 &
+
+    local pid=$!
+    echo "$pid" > "$PID_FILE"
+    log_msg "PID: $pid"
+
+    # ------- 10.确认启动 --------
+    sleep 2
+    if status >/dev/null 2>&1; then
+        log_msg "应用启动成功"
+        return 0
+    else
+        log_msg "❌ 应用启动失败，查看日志: $LOG_FILE"
+        return 1
+    fi
+}
+
+# ============================================
+# 停止函数
+# ============================================
+stop_process() {
+    log_msg "========== 停止 =========="
+    local pid=$(head -n 1 "$PID_FILE" 2>/dev/null | tr -d '[:space:]')
+    if [ -z "$pid" ]; then
+        log_msg "应用未运行"
+        return 0
+    fi
+    if ! kill -0 "$pid" 2>/dev/null; then
+        rm -f "$PID_FILE"
+        log_msg "应用未运行"
+        return 0
+    fi
+    log_msg "发送 TERM 信号到 PID: $pid"
+    kill -TERM "$pid" 2>/dev/null
+    local count=0
+    while kill -0 "$pid" 2>/dev/null && [ $count -lt 10 ]; do
+        sleep 1
+        count=$((count + 1))
+        log_msg "等待进程退出... ${count}s/10s"
+    done
+    if kill -0 "$pid" 2>/dev/null; then
+        log_msg "强制停止 PID: $pid"
+        kill -KILL "$pid" 2>/dev/null
+        sleep 1
+    fi
+    rm -f "$PID_FILE"
+    log_msg "应用已停止"
+    return 0
+}
+
+# ============================================
+# 主入口
+# ============================================
+case "$1" in
     start)
         start_process
-        exit 0
+        exit $?
         ;;
     stop)
         stop_process
         exit 0
         ;;
     status)
-        if status; then
-            exit 0
-        else
-            exit 3
-        fi
+        status
+        exit $?
         ;;
     *)
         exit 1
