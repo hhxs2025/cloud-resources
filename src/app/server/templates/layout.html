@@ -264,7 +264,8 @@
             height: 12px;
         }
 
-        input,
+        /* 全局输入框样式（不含 checkbox） */
+        input:not([type="checkbox"]):not([type="radio"]),
         select,
         textarea {
             font-family: inherit;
@@ -279,7 +280,7 @@
             transition: border-color 0.15s;
         }
 
-        input:focus,
+        input:not([type="checkbox"]):not([type="radio"]):focus,
         select:focus,
         textarea:focus {
             outline: none;
@@ -287,11 +288,25 @@
             box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.08);
         }
 
+        /* 专门处理 checkbox 和 radio，防止被全局样式挤压 */
+        input[type="checkbox"],
+        input[type="radio"] {
+            width: 16px !important;
+            height: 16px !important;
+            flex-shrink: 0;
+            padding: 0;
+            margin: 0;
+            border: none;
+            background: transparent;
+            box-shadow: none;
+            cursor: pointer;
+        }
+
         label {
             font-weight: 500;
             font-size: 13px;
             color: #475569;
-            display: block;
+            /* display: block; */
             margin-bottom: 3px;
         }
 
@@ -634,7 +649,8 @@
                     </svg>
                     资源
                 </a>
-                <!-- ===== 📖 教程按钮 ===== -->
+                <!-- ===== 📖 教程按钮（受 hide_tutorial 控制） ===== -->
+                {% if not config.hide_tutorial %}
                 <a href="javascript:void(0)" onclick="showTutorial()">
                     <svg viewBox="0 0 24 24">
                         <path
@@ -642,6 +658,7 @@
                     </svg>
                     教程
                 </a>
+                {% endif %}
                 <!-- ===== 教程按钮结束 ===== -->
                 {% if current_user.is_authenticated %}
                 {% if current_user.is_admin %}

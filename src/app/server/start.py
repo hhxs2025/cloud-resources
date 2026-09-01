@@ -18,8 +18,6 @@ if not TRIM_PKGVAR:
     APP_ROOT = os.path.dirname(CURRENT_DIR)  # 应用根目录
     APP_NAME = os.path.basename(APP_ROOT)
     
-    # 尝试从存储池路径推断 @appdata
-    # 1.1.0 修正：去掉 /var，保持与 1.0.5 实际运行路径一致
     if '/@appcenter/' in APP_ROOT:
         vol_path = APP_ROOT.split('/@appcenter/')[0]
         TRIM_PKGVAR = os.path.join(vol_path, '@appdata', APP_NAME)  # 不加 /var

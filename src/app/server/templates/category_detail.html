@@ -1,0 +1,74 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<div class="flex-between mb-10">
+    <h2 style="color: #1e293b; font-size: 18px; font-weight: 600; display: flex; align-items: center; gap: 6px;">
+        <span style="font-size: 20px;">📂</span> {{ category.name }}
+    </h2>
+    <a href="{{ url_for('index') }}" class="btn btn-outline btn-sm">← 返回分类</a>
+</div>
+
+<!-- ===== 标签筛选（复用原 resources.html 风格） ===== -->
+{% if tags %}
+<div class="flex mb-10" style="gap: 6px; flex-wrap: wrap;">
+    {% for t in tags %}
+        <a href="{{ url_for('category_detail', category_id=category.id) }}?tag={{ t.id }}" class="btn btn-outline btn-sm">#{{ t.name }}</a>
+    {% endfor %}
+</div>
+{% endif %}
+
+<!-- ===== 资源列表：表格视图 ===== -->
+<div class="card" style="padding: 0; overflow: hidden;">
+    {% if resources %}
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 30px; padding-left: 16px;">#</th>
+                        <th style="text-align: left;">资源名称</th>
+                        <th style="text-align: left;">标签</th>
+                        <th style="text-align: right;">大小</th>
+                        <th style="text-align: right;">下载</th>
+                        <th style="text-align: right;">日期</th>
+                        <th style="text-align: center; width: 130px;">操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in resources %}
+                    <tr>
+                        <td style="padding-left: 16px; color: #94a3b8; font-size: 12px;">{{ loop.index }}</td>
+                        <td>
+                            <a href="{{ url_for('resource_detail', resource_id=r.id) }}" style="color: #1e293b; text-decoration: none; font-weight: 500;">
+                                {{ r.title }}
+                            </a>
+                        </td>
+                        <td>
+                            {% for tag in r.tags %}
+                                <span class="tag">{{ tag.name }}</span>
+                            {% endfor %}
+                        </td>
+                        <td style="text-align: right; color: #64748b; font-size: 13px;">{{ r.file_size|filesizeformat }}</td>
+                        <td style="text-align: right; color: #64748b; font-size: 13px;">{{ r.download_count }}</td>
+                        <td style="text-align: right; color: #94a3b8; font-size: 12px;">{{ r.created_at.strftime('%Y-%m-%d') }}</td>
+                        <td style="text-align: center;">
+                            <a href="{{ url_for('resource_detail', resource_id=r.id) }}" class="btn btn-outline btn-sm" style="padding: 2px 10px; font-size: 12px;">详情</a>
+                            {% if current_user.is_authenticated %}
+                                <a href="{{ url_for('download_resource', resource_id=r.id) }}" class="btn btn-primary btn-sm" style="padding: 2px 10px; font-size: 12px;">下载</a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div style="padding: 10px 16px; border-top: 1px solid #e8edf2; color: #94a3b8; font-size: 12px; background: #fafbfc;">
+            共 {{ resources|length }} 个资源
+        </div>
+    {% else %}
+        <div style="padding: 30px 20px; text-align: center; color: #94a3b8; font-size: 14px;">
+            📭 该分类下暂无资源
+        </div>
+    {% endif %}
+</div>
+
+{% endblock %}

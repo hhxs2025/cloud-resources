@@ -1,13 +1,27 @@
 {% extends "layout.html" %}
 {% block content %}
+
+<!-- ===== 关于我们（首页唯一内容） ===== -->
 <div class="card">
-    <h2>关于我们</h2>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid #e8edf2;">
+        <h2 style="font-size: 16px; font-weight: 600; color: #1e293b; margin: 0; border: none; padding: 0;">
+            📖 关于我们
+        </h2>
+        {% if current_user.is_authenticated and current_user.is_admin %}
+            <a href="{{ url_for('admin_settings') }}" class="btn btn-outline btn-sm">✏️ 编辑</a>
+        {% endif %}
+    </div>
     <div style="line-height: 1.8; color: #475569; font-size: 15px;">
         {% if config and config.about_content %}
             {{ config.about_content|markdown|safe }}
         {% else %}
-            <p>暂无介绍，请在 <a href="{{ url_for('admin_settings') }}" style="color: #2563eb;">站点设置</a> 中添加。</p>
+            <p>暂无介绍
+            {% if current_user.is_authenticated and current_user.is_admin %}
+                ，<a href="{{ url_for('admin_settings') }}" style="color: #2563eb;">去添加</a>
+            {% endif %}
+            </p>
         {% endif %}
     </div>
 </div>
+
 {% endblock %}

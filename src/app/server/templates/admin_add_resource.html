@@ -1,35 +1,14 @@
 {% extends "layout.html" %}
 {% block content %}
 <div class="flex-between mb-10">
-    <h2 style="color: #1e293b; font-size: 17px; font-weight: 600;">添加资源</h2>
+    <h2 style="color: #1e293b; font-size: 17px; font-weight: 600; display: flex; align-items: center; gap: 6px;">
+        <span style="font-size: 19px;">📄</span> 添加资源
+    </h2>
     <a href="{{ url_for('admin_resources') }}" class="btn btn-outline btn-sm">← 返回</a>
 </div>
 
 <div class="card">
-    <!-- 模式选择 -->
-    <div style="margin-bottom: 16px;">
-        <label style="display: block; font-weight: 500; font-size: 13px; color: #475569; margin-bottom: 3px;">上传方式</label>
-        <select id="mode-select" style="width: 100%; max-width: 300px; padding: 7px 12px; border: 1px solid #d1d9e6; border-radius: 6px; font-size: 14px;">
-            <option value="single">单个上传</option>
-            <option value="batch">批量上传</option>
-            <option value="folder">文件夹导入</option>
-        </select>
-    </div>
-
-    <!-- 进度条 -->
-    <div id="progress-wrapper" style="display: none; margin-bottom: 16px;">
-        <div style="display: flex; justify-content: space-between; font-size: 13px; color: #475569; margin-bottom: 4px;">
-            <span id="progress-text">上传中...</span>
-            <span id="progress-percent">0%</span>
-        </div>
-        <div style="width: 100%; height: 8px; background: #e8edf2; border-radius: 4px; overflow: hidden;">
-            <div id="progress-bar" style="width: 0%; height: 100%; background: #2563eb; border-radius: 4px; transition: width 0.3s;"></div>
-        </div>
-        <div id="progress-status" style="margin-top: 6px; font-size: 13px; color: #94a3b8;"></div>
-    </div>
-
-    <!-- ===== 单个上传 ===== -->
-    <form id="form-single" method="POST" action="{{ url_for('admin_add_resource') }}" enctype="multipart/form-data" class="upload-form">
+    <form method="POST" action="{{ url_for('admin_add_resource') }}" enctype="multipart/form-data">
         <div style="margin-bottom: 12px;">
             <label style="display: block; font-weight: 500; font-size: 13px; color: #475569; margin-bottom: 3px;">标题 *</label>
             <input type="text" name="title" required style="width: 100%; padding: 7px 12px; border: 1px solid #d1d9e6; border-radius: 6px; font-size: 14px;">
@@ -51,190 +30,39 @@
             <label style="display: block; font-weight: 500; font-size: 13px; color: #475569; margin-bottom: 3px;">描述（支持 Markdown）</label>
             <textarea name="description" style="width: 100%; min-height: 100px; padding: 7px 12px; border: 1px solid #d1d9e6; border-radius: 6px; font-size: 14px; font-family: monospace;"></textarea>
         </div>
+
+        <!-- ===== 标签区域（修复：复选框+标签名横排，左对齐） ===== -->
         <div style="margin-bottom: 12px;">
-            <label style="font-weight: 500; font-size: 13px; color: #475569;">标签</label>
-            {% for t in tags %}
-                <label style="margin-right: 12px; font-weight: normal;">
-                    <input type="checkbox" name="tag_ids" value="{{ t.id }}"> {{ t.name }}
+            <label style="display: block; font-weight: 500; font-size: 13px; color: #475569; margin-bottom: 4px;">标签</label>
+            <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                {% for t in tags %}
+                <label style="font-weight: normal; font-size: 13px; color: #475569; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; background: #f8fafc; padding: 3px 12px 3px 8px; border-radius: 4px; border: 1px solid #e8edf2;">
+                    <input type="checkbox" name="tag_ids" value="{{ t.id }}">
+                    {{ t.name }}
                 </label>
-            {% endfor %}
+                {% endfor %}
+            </div>
+            <div style="font-size: 11px; color: #94a3b8; margin-top: 3px;">不勾选则不加标签</div>
         </div>
+
+        <!-- ===== 批量上传区域 ===== -->
+        <div style="margin: 16px 0; padding: 14px 16px; background: #f0f7ff; border-radius: 6px; border: 1px dashed #2563eb;">
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+                <span style="font-size: 16px;">📁</span>
+                <strong style="font-size: 14px; color: #1e293b;">批量上传</strong>
+                <span style="font-size: 12px; color: #94a3b8;">（选多个文件，每个自动创建资源）</span>
+            </div>
+            <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center;">
+                <input type="file" name="batch_files" multiple style="padding: 4px; font-size: 13px; flex: 1; min-width: 180px;">
+                <input type="text" name="title_prefix" placeholder="标题前缀（可选）" style="padding: 5px 10px; border: 1px solid #d1d9e6; border-radius: 6px; font-size: 13px; width: 140px;">
+                <button type="submit" formaction="{{ url_for('admin_add_resources_batch') }}" class="btn btn-success btn-sm">🚀批量提交</button>
+            </div>
+            <div style="font-size: 11px; color: #94a3b8; margin-top: 4px;">
+                💡文件名作为标题，支持同时选多个文件
+            </div>
+        </div>
+
         <button type="submit" class="btn btn-success">提交</button>
     </form>
-
-    <!-- ===== 批量上传 ===== -->
-    <form id="form-batch" method="POST" action="{{ url_for('admin_add_resources_batch') }}" enctype="multipart/form-data" class="upload-form" style="display: none;">
-        <div style="margin-bottom: 12px;">
-            <label style="display: block; font-weight: 500; font-size: 13px; color: #475569; margin-bottom: 3px;">分类</label>
-            <select name="category_id" style="width: 100%; padding: 7px 12px; border: 1px solid #d1d9e6; border-radius: 6px; font-size: 14px;">
-                <option value="">选择分类</option>
-                {% for c in categories %}
-                    <option value="{{ c.id }}">{{ c.name }}</option>
-                {% endfor %}
-            </select>
-        </div>
-        <div style="margin-bottom: 12px;">
-            <label style="display: block; font-weight: 500; font-size: 13px; color: #475569; margin-bottom: 3px;">标题前缀（可选）</label>
-            <input type="text" name="title_prefix" placeholder="例如：教程-" style="width: 100%; padding: 7px 12px; border: 1px solid #d1d9e6; border-radius: 6px; font-size: 14px;">
-            <div style="font-size: 12px; color: #94a3b8; margin-top: 2px;">每个资源标题 = 前缀 + 文件名（不含扩展名）</div>
-        </div>
-        <div style="margin-bottom: 12px;">
-            <label style="display: block; font-weight: 500; font-size: 13px; color: #475569; margin-bottom: 3px;">选择多个文件</label>
-            <input type="file" name="batch_files" multiple required style="padding: 4px;">
-            <div style="font-size: 12px; color: #94a3b8; margin-top: 2px;">按住 Ctrl 或 Cmd 可同时选多个文件</div>
-        </div>
-        <div style="margin-bottom: 12px;">
-            <label style="display: block; font-weight: 500; font-size: 13px; color: #475569; margin-bottom: 3px;">统一描述（可选）</label>
-            <textarea name="description" style="width: 100%; min-height: 80px; padding: 7px 12px; border: 1px solid #d1d9e6; border-radius: 6px; font-size: 14px; font-family: monospace;"></textarea>
-        </div>
-        <div style="margin-bottom: 12px;">
-            <label style="font-weight: 500; font-size: 13px; color: #475569;">标签（所有文件共用）</label>
-            {% for t in tags %}
-                <label style="margin-right: 12px; font-weight: normal;">
-                    <input type="checkbox" name="tag_ids" value="{{ t.id }}"> {{ t.name }}
-                </label>
-            {% endfor %}
-        </div>
-        <button type="submit" class="btn btn-primary">开始批量导入</button>
-    </form>
-
-    <!-- ===== 文件夹导入 ===== -->
-    <form id="form-folder" method="POST" action="{{ url_for('admin_add_resources_batch') }}" enctype="multipart/form-data" class="upload-form" style="display: none;">
-        <div style="margin-bottom: 12px;">
-            <label style="display: block; font-weight: 500; font-size: 13px; color: #475569; margin-bottom: 3px;">分类</label>
-            <select name="category_id" style="width: 100%; padding: 7px 12px; border: 1px solid #d1d9e6; border-radius: 6px; font-size: 14px;">
-                <option value="">选择分类</option>
-                {% for c in categories %}
-                    <option value="{{ c.id }}">{{ c.name }}</option>
-                {% endfor %}
-            </select>
-        </div>
-        <div style="margin-bottom: 12px;">
-            <label style="display: block; font-weight: 500; font-size: 13px; color: #475569; margin-bottom: 3px;">标题前缀（可选）</label>
-            <input type="text" name="title_prefix" placeholder="例如：素材-" style="width: 100%; padding: 7px 12px; border: 1px solid #d1d9e6; border-radius: 6px; font-size: 14px;">
-        </div>
-        <div style="margin-bottom: 12px;">
-            <label style="display: block; font-weight: 500; font-size: 13px; color: #475569; margin-bottom: 3px;">选择文件夹</label>
-            <input type="file" name="folder_files" webkitdirectory multiple required style="padding: 4px;">
-            <div style="font-size: 12px; color: #94a3b8; margin-top: 2px;">选一个文件夹，里面所有文件一次性导入</div>
-        </div>
-        <div style="margin-bottom: 12px;">
-            <label style="display: block; font-weight: 500; font-size: 13px; color: #475569; margin-bottom: 3px;">统一描述（可选）</label>
-            <textarea name="description" style="width: 100%; min-height: 80px; padding: 7px 12px; border: 1px solid #d1d9e6; border-radius: 6px; font-size: 14px; font-family: monospace;"></textarea>
-        </div>
-        <div style="margin-bottom: 12px;">
-            <label style="font-weight: 500; font-size: 13px; color: #475569;">标签（所有文件共用）</label>
-            {% for t in tags %}
-                <label style="margin-right: 12px; font-weight: normal;">
-                    <input type="checkbox" name="tag_ids" value="{{ t.id }}"> {{ t.name }}
-                </label>
-            {% endfor %}
-        </div>
-        <button type="submit" class="btn btn-primary">开始导入</button>
-    </form>
 </div>
-
-<script>
-// ===== 模式切换 =====
-document.getElementById('mode-select').addEventListener('change', function() {
-    var val = this.value;
-    document.getElementById('form-single').style.display = val === 'single' ? '' : 'none';
-    document.getElementById('form-batch').style.display = val === 'batch' ? '' : 'none';
-    document.getElementById('form-folder').style.display = val === 'folder' ? '' : 'none';
-});
-
-// ===== 进度条 =====
-(function() {
-    var forms = document.querySelectorAll('.upload-form');
-    var progressWrapper = document.getElementById('progress-wrapper');
-    var progressBar = document.getElementById('progress-bar');
-    var progressText = document.getElementById('progress-text');
-    var progressPercent = document.getElementById('progress-percent');
-    var progressStatus = document.getElementById('progress-status');
-
-    forms.forEach(function(form) {
-        form.addEventListener('submit', function(e) {
-            var fileInput = form.querySelector('input[type="file"]');
-            var files = fileInput.files;
-            if (!files || files.length === 0) return;
-
-            // 检查是否有大文件（> 5MB 显示进度条）
-            var hasLargeFile = false;
-            var totalSize = 0;
-            for (var i = 0; i < files.length; i++) {
-                totalSize += files[i].size;
-                if (files[i].size > 5 * 1024 * 1024) {
-                    hasLargeFile = true;
-                }
-            }
-
-            // 只有文件大于 5MB 或批量文件数 > 5 时才显示进度条
-            if (!hasLargeFile && files.length <= 5) {
-                return; // 小文件直接提交，不显示进度条
-            }
-
-            e.preventDefault();
-
-            // 显示进度条
-            progressWrapper.style.display = 'block';
-            progressBar.style.width = '0%';
-            progressPercent.textContent = '0%';
-            progressText.textContent = '正在上传...';
-            progressStatus.textContent = '已选择 ' + files.length + ' 个文件，共 ' + formatSize(totalSize);
-
-            var xhr = new XMLHttpRequest();
-            var formData = new FormData(form);
-
-            xhr.open('POST', form.action, true);
-
-            xhr.upload.addEventListener('progress', function(event) {
-                if (event.lengthComputable) {
-                    var percent = Math.round((event.loaded / event.total) * 100);
-                    progressBar.style.width = percent + '%';
-                    progressPercent.textContent = percent + '%';
-                    progressText.textContent = '上传中...';
-                }
-            });
-
-            xhr.addEventListener('load', function() {
-                if (xhr.status >= 200 && xhr.status < 300) {
-                    progressBar.style.width = '100%';
-                    progressPercent.textContent = '100%';
-                    progressText.textContent = '上传完成！';
-                    progressStatus.textContent = '正在处理，请稍候...';
-                    // 跳转
-                    window.location.href = xhr.responseURL || '{{ url_for("admin_resources") }}';
-                } else {
-                    progressText.textContent = '上传失败';
-                    progressStatus.textContent = '错误码: ' + xhr.status;
-                    progressBar.style.background = '#ef4444';
-                    setTimeout(function() {
-                        progressWrapper.style.display = 'none';
-                        progressBar.style.background = '#2563eb';
-                    }, 3000);
-                }
-            });
-
-            xhr.addEventListener('error', function() {
-                progressText.textContent = '网络错误';
-                progressStatus.textContent = '请检查网络连接';
-                progressBar.style.background = '#ef4444';
-                setTimeout(function() {
-                    progressWrapper.style.display = 'none';
-                    progressBar.style.background = '#2563eb';
-                }, 3000);
-            });
-
-            xhr.send(formData);
-        });
-    });
-
-    function formatSize(bytes) {
-        if (bytes < 1024) return bytes + ' B';
-        if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
-        if (bytes < 1073741824) return (bytes / 1048576).toFixed(1) + ' MB';
-        return (bytes / 1073741824).toFixed(2) + ' GB';
-    }
-})();
-</script>
 {% endblock %}

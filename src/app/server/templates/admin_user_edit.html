@@ -1,0 +1,53 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="flex-between mb-10">
+    <h2 style="color: #1e293b; font-size: 17px; font-weight: 600; display: flex; align-items: center; gap: 6px;">
+        <span style="font-size: 19px;">🔑</span> 编辑用户权限
+    </h2>
+    <a href="{{ url_for('admin_users') }}" class="btn btn-outline btn-sm">← 返回用户列表</a>
+</div>
+
+<div class="card">
+    <!-- ===== 调试信息 ===== -->
+    <div style="background: #ff0000; color: #fff; padding: 10px; margin-bottom: 16px; border-radius: 4px; font-size: 14px;">
+        🔧 DEBUG: 分类数量 = {{ categories|length }}，标签数量 = {{ tags|length }}，激活状态 = {{ is_app_activated }}
+    </div>
+
+    {% if not is_app_activated %}
+    <div style="background: #fffbeb; padding: 12px 16px; border-radius: 6px; border-left: 3px solid #f59e0b; margin-bottom: 16px; font-size: 13px; color: #78350f;">
+        🔒 下载权限功能需要 <a href="{{ url_for('admin_license') }}" style="color: #2563eb; text-decoration: underline;">激活应用</a> 后才能使用。
+    </div>
+    {% endif %}
+
+    <form method="POST">
+        <div style="margin-bottom: 16px;">
+            <label style="display: block; font-weight: 500; font-size: 13px; color: #475569; margin-bottom: 3px;">用户名</label>
+            <input type="text" value="{{ user.username }}" disabled style="width: 100%; max-width: 300px; padding: 7px 12px; border: 1px solid #d1d9e6; border-radius: 6px; font-size: 14px; background: #f1f5f9;">
+        </div>
+
+        <!-- ===== 分类区域（已改宽） ===== -->
+        <div style="margin-bottom: 14px;">
+            <label style="display: block; font-weight: 500; font-size: 13px; color: #475569; margin-bottom: 6px;">允许下载的分类</label>
+            {% if is_app_activated %}
+            <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                {% for c in categories %}
+                <label style="font-weight: normal; font-size: 13px; color: #475569; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; background: #f8fafc; padding: 6px 14px; border-radius: 4px; border: 1px solid #e8edf2; min-width: 80px;">
+                    <input type="checkbox" name="download_categories" value="{{ c.id }}" style="width:16px; height:16px; margin:0; flex-shrink:0;"
+                        {% if c.id|string in (user.download_categories or '').split(',') %}checked{% endif %}>
+                    {{ c.name }}
+                </label>
+                {% endfor %}
+            </div>
+            <div style="font-size: 11px; color: #94a3b8; margin-top: 4px;">不勾选=允许全部，勾选=只允许勾选的分类</div>
+            {% else %}
+            <div style="color: #94a3b8; font-size: 13px; padding: 8px 0;">🔒 请先 <a href="{{ url_for('admin_license') }}" style="color: #2563eb;">激活应用</a></div>
+            {% endif %}
+        </div>
+
+        <div style="margin-top: 16px; padding-top: 14px; border-top: 1px solid #e8edf2; display: flex; gap: 10px;">
+            <button type="submit" class="btn btn-primary" {% if not is_app_activated %}disabled style="opacity:0.6;cursor:not-allowed;"{% endif %}>保存权限</button>
+            <a href="{{ url_for('admin_users') }}" class="btn btn-outline">取消</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

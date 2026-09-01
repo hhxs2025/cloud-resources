@@ -47,7 +47,16 @@
     <h2 style="font-size: 15px; font-weight: 600; color: #1e293b; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid #e8edf2;">📋 用户列表</h2>
     <div class="table-wrapper">
         <table>
-            <thead><tr><th>用户名</th><th>角色</th><th>状态</th><th>创建时间</th><th>操作</th></tr></thead>
+            <thead>
+                <tr>
+                    <th>用户名</th>
+                    <th>角色</th>
+                    <th>状态</th>
+                    <th>权限</th>
+                    <th>创建时间</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
             <tbody>
                 {% for u in users %}
                 <tr>
@@ -63,22 +72,41 @@
                             {% if u.is_active %}启用{% else %}禁用{% endif %}
                         </span>
                     </td>
+                    <td style="font-size: 12px; max-width: 200px;">
+                        {% if u.is_admin %}
+                            <span style="color: #94a3b8;">无限制</span>
+                        {% else %}
+                            {% if not is_app_activated %}
+                                <span style="color: #f59e0b; font-size: 11px;">🔒 激活后可用</span>
+                            {% elif u.download_categories %}
+                                {% set cat_ids = u.download_categories.split(',') %}
+                                {% for c in categories if c.id|string in cat_ids %}
+                                    <span class="tag" style="background: #dbeafe; color: #1e40af;">{{ c.name }}</span>
+                                {% endfor %}
+                            {% else %}
+                                <span style="color: #94a3b8; font-size: 11px;">全部</span>
+                            {% endif %}
+                        {% endif %}
+                    </td>
                     <td>{{ u.created_at.strftime('%Y-%m-%d') }}</td>
                     <td>
+                        {% if not u.is_admin and is_app_activated %}
+                            <a href="{{ url_for('admin_edit_user_page', user_id=u.id) }}" class="btn btn-outline btn-sm" style="padding: 2px 8px; font-size: 11px;">权限</a>
+                        {% endif %}
                         <form method="POST" action="{{ url_for('admin_reset_password', user_id=u.id) }}" style="display: inline;" onsubmit="return confirm('确定重置该用户密码为 123456 吗？')">
-                            <button type="submit" class="btn btn-warning btn-sm">重置密码</button>
+                            <button type="submit" class="btn btn-warning btn-sm" style="padding: 2px 8px; font-size: 11px;">重置</button>
                         </form>
                         {% if u.id != current_user.id %}
                             <form method="POST" action="{{ url_for('admin_toggle_user', user_id=u.id) }}" style="display: inline;">
-                                <button type="submit" class="btn btn-{% if u.is_active %}danger{% else %}success{% endif %} btn-sm">
+                                <button type="submit" class="btn btn-{% if u.is_active %}danger{% else %}success{% endif %} btn-sm" style="padding: 2px 8px; font-size: 11px;">
                                     {% if u.is_active %}禁用{% else %}启用{% endif %}
                                 </button>
                             </form>
                             <form method="POST" action="{{ url_for('admin_delete_user', user_id=u.id) }}" style="display: inline;" onsubmit="return confirm('确定删除此用户？')">
-                                <button type="submit" class="btn btn-danger btn-sm">删除</button>
+                                <button type="submit" class="btn btn-danger btn-sm" style="padding: 2px 8px; font-size: 11px;">删除</button>
                             </form>
                         {% else %}
-                            <span class="text-muted" style="font-size: 11px;">不可操作自己</span>
+                            <span class="text-muted" style="font-size: 11px;">不可操作</span>
                         {% endif %}
                     </td>
                 </tr>

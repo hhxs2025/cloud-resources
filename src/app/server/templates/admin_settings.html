@@ -89,6 +89,15 @@
                 style="width: 100%; max-width: 400px; padding: 7px 12px; border: 1px solid #d1d9e6; border-radius: 6px; font-size: 14px;">
         </div>
 
+        <!-- 1.2.0 新增：隐藏教程栏 -->
+        <div style="margin-bottom: 12px; padding-top: 8px; border-top: 1px solid #e8edf2;">
+            <label
+                style="display: flex; align-items: center; gap: 8px; font-weight: 500; font-size: 13px; color: #475569; cursor: pointer;">
+                <input type="checkbox" name="hide_tutorial" {% if config.hide_tutorial %}checked{% endif %}> 隐藏教程栏
+            </label>
+            <div style="font-size: 11px; color: #94a3b8; margin-top: 2px;">开启后，前台导航栏的「教程」按钮将隐藏</div>
+        </div>
+
         <button type="submit" class="btn btn-primary">保存品牌设置</button>
     </form>
     <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e8edf2; font-size: 12px; color: #94a3b8;">
