@@ -72,7 +72,7 @@
 | 教程栏隐藏 | 已激活用户可在站点设置中隐藏前台导航栏的「教程」按钮 |
 | 移除默认分类初始化 | 应用安装后不再自动创建默认分类，用户自行在后台创建分类结构 |
 
-[1.2.0版下载按钮](https://gitee.com/hhxs2025/cloud-resources/releases/download/1.2.0/cloud-resources.fpk)
+[1.2.0版下载按钮](https://gitee.com/hhxs2025/cloud-resources/releases/download/1.2.0/cloud-resources-1.2.0-x86-so.fpk)
 
 
 ### 预览图
