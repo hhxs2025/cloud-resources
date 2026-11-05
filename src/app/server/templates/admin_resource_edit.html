@@ -1,57 +1,51 @@
 {% extends "layout.html" %}
 {% block content %}
 <div class="flex-between mb-10">
-    <h2 style="color: #1e293b; font-size: 17px; font-weight: 600; display: flex; align-items: center; gap: 6px;">
-        <span style="font-size: 19px;">✏️</span> 编辑资源
-    </h2>
-    <a href="{{ url_for('admin_resources') }}" class="btn btn-outline btn-sm">← 返回</a>
+    <h2 style="font-size: 20px; font-weight: 600;">编辑资源</h2>
+    <a href="{{ url_for('admin_resources') }}" class="btn">返回</a>
 </div>
 
 <div class="card">
     <form method="POST">
-        <div style="margin-bottom: 12px;">
-            <label style="display: block; font-weight: 500; font-size: 13px; color: #475569; margin-bottom: 3px;">标题 *</label>
-            <input type="text" name="title" value="{{ resource.title }}" required style="width: 100%; padding: 7px 12px; border: 1px solid #d1d9e6; border-radius: 6px; font-size: 14px;">
+        <div class="form-group">
+            <label>资源标题 *</label>
+            <input type="text" name="title" value="{{ resource.title }}" required>
         </div>
-        <div style="margin-bottom: 12px;">
-            <label style="display: block; font-weight: 500; font-size: 13px; color: #475569; margin-bottom: 3px;">分类</label>
-            <select name="category_id" style="width: 100%; padding: 7px 12px; border: 1px solid #d1d9e6; border-radius: 6px; font-size: 14px;">
+        <div class="form-group">
+            <label>分类</label>
+            <select name="category_id">
                 <option value="">选择分类</option>
                 {% for c in categories %}
                     <option value="{{ c.id }}" {% if resource.category_id == c.id %}selected{% endif %}>{{ c.name }}</option>
                 {% endfor %}
             </select>
         </div>
-        <div style="margin-bottom: 12px;">
-            <label style="display: block; font-weight: 500; font-size: 13px; color: #475569; margin-bottom: 3px;">描述（支持 Markdown）</label>
-            <textarea name="description" style="width: 100%; min-height: 100px; padding: 7px 12px; border: 1px solid #d1d9e6; border-radius: 6px; font-size: 14px; font-family: monospace;">{{ resource.description }}</textarea>
+        <div class="form-group wide">
+            <label>资源描述 (支持 Markdown)</label>
+            <textarea name="description" style="min-height: 150px;">{{ resource.description }}</textarea>
         </div>
-        <div style="margin-bottom: 12px;">
-            <label style="font-weight: 500; font-size: 13px; color: #475569;">标签</label>
-            {% for t in tags %}
-                <label style="margin-right: 12px; font-weight: normal;">
+        <div class="form-group">
+            <label>标签</label>
+            <div style="display: flex; gap: 16px; flex-wrap: wrap;">
+                {% for t in tags %}
+                <label style="display: flex; align-items: center; cursor: pointer; margin-bottom: 0;">
                     <input type="checkbox" name="tag_ids" value="{{ t.id }}" {% if t in resource.tags %}checked{% endif %}> {{ t.name }}
                 </label>
-            {% endfor %}
+                {% endfor %}
+            </div>
         </div>
-        <button type="submit" class="btn btn-primary">保存</button>
+        <button type="submit" class="btn btn-primary">保存修改</button>
     </form>
 </div>
 
-<!-- ===== 替换文件（1.1.0 新增） ===== -->
-<div class="card" style="border-top: 3px solid #f59e0b;">
-    <h2 style="font-size: 15px; font-weight: 600; color: #1e293b; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid #e8edf2; display: flex; align-items: center; gap: 8px;">
-        <span style="font-size: 18px;">🔄</span> 替换文件
-    </h2>
-    <div style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-bottom: 10px;">
-        <span style="font-size: 13px; color: #64748b;">当前文件：</span>
-        <span style="font-size: 14px; font-weight: 500; color: #1e293b;">{{ resource.file_name }}</span>
-        <span style="font-size: 12px; color: #94a3b8;">（{{ resource.file_size|filesizeformat }}）</span>
+<div class="card" style="border-left: 4px solid var(--primary);">
+    <div class="card-title">替换文件</div>
+    <div style="margin-bottom: 16px; font-size: 14px; color: var(--text-sec);">
+        当前文件：<span style="font-weight: 500; color: var(--text-main);">{{ resource.file_name }}</span> ({{ resource.file_size|filesizeformat }})
     </div>
-    <form method="POST" action="{{ url_for('admin_replace_file', resource_id=resource.id) }}" enctype="multipart/form-data" style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
-        <input type="file" name="file" required style="padding: 4px; font-size: 13px;">
-        <button type="submit" class="btn btn-warning btn-sm">🔄 替换</button>
-        <span style="font-size: 12px; color: #94a3b8;">⚠️ 替换后旧文件将被删除，其他信息不变</span>
+    <form method="POST" action="{{ url_for('admin_replace_file', resource_id=resource.id) }}" enctype="multipart/form-data" style="display: flex; gap: 16px; align-items: center; flex-wrap: wrap;">
+        <input type="file" name="file" required style="border: none; padding: 0; flex: 1; max-width: 300px;">
+        <button type="submit" class="btn btn-primary" onclick="return confirm('确定替换文件吗？旧文件将被删除。')">替换并删除旧文件</button>
     </form>
 </div>
 {% endblock %}

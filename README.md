@@ -74,6 +74,15 @@
 
 [1.2.0版下载按钮](https://gitee.com/hhxs2025/cloud-resources/releases/download/1.2.0/cloud-resources.fpk)
 
+### 云资源 1.2.1 更新说明（最新版本）
+
+| 功能 | 说明 |
+|------|------|
+| 修复 | 修复用户权限授权时勾选多个资源分类无效的问题 |
+| 优化 | UI优化 |
+
+[1.2.1版下载按钮](https://gitee.com/hhxs2025/cloud-resources/releases/download/1.2.1/cloud-resources.fpk)
+
 
 ### 预览图
 | 首页 | 资源列表 |

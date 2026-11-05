@@ -1,50 +1,42 @@
 {% extends "layout.html" %}
 {% block content %}
 <div class="flex-between mb-10">
-    <h2 style="color: #1e293b; font-size: 17px; font-weight: 600; display: flex; align-items: center; gap: 6px;">
-        <span style="font-size: 19px;">👤</span> 用户管理
-    </h2>
-    <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline btn-sm">← 返回管理</a>
+    <h2 style="font-size: 20px; font-weight: 600;">用户管理</h2>
+    <a href="{{ url_for('admin_dashboard') }}" class="btn">返回</a>
 </div>
 
-<!-- ===== 修改管理员密码 ===== -->
-<div class="card" style="border-left: 3px solid #2563eb;">
-    <h2 style="font-size: 15px; font-weight: 600; color: #1e293b; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid #e8edf2;">🔑 修改我的密码</h2>
-    <form method="POST" action="{{ url_for('admin_change_password') }}">
-        <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end;">
-            <div style="flex: 1; min-width: 200px;">
-                <label style="display: block; font-weight: 500; font-size: 13px; color: #475569; margin-bottom: 3px;">新密码</label>
-                <input type="password" name="new_password" placeholder="请输入新密码（至少6位）" required style="width: 100%; padding: 7px 12px; border: 1px solid #d1d9e6; border-radius: 6px; font-size: 14px;">
-            </div>
-            <button type="submit" class="btn btn-primary">修改密码</button>
+<div class="card">
+    <div class="card-title">修改我的密码</div>
+    <form method="POST" action="{{ url_for('admin_change_password') }}" style="display: flex; gap: 16px; align-items: flex-end; flex-wrap: wrap;">
+        <div class="form-group" style="margin-bottom: 0; width: 300px;">
+            <label>新密码</label>
+            <input type="password" name="new_password" required placeholder="至少 6 位">
         </div>
+        <button type="submit" class="btn btn-primary">修改密码</button>
     </form>
 </div>
 
-<!-- ===== 添加用户 ===== -->
 <div class="card">
-    <h2 style="font-size: 15px; font-weight: 600; color: #1e293b; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid #e8edf2;">➕ 添加用户</h2>
-    <form method="POST" action="{{ url_for('admin_add_user') }}" style="display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end;">
-        <div>
-            <label style="display: block; font-weight: 500; font-size: 13px; color: #475569; margin-bottom: 3px;">用户名</label>
-            <input type="text" name="username" placeholder="用户名" required style="padding: 7px 12px; border: 1px solid #d1d9e6; border-radius: 6px; font-size: 14px; width: 150px;">
+    <div class="card-title">添加用户</div>
+    <form method="POST" action="{{ url_for('admin_add_user') }}" style="display: flex; gap: 16px; align-items: flex-end; flex-wrap: wrap;">
+        <div class="form-group" style="margin-bottom: 0; width: 200px;">
+            <label>用户名</label>
+            <input type="text" name="username" required placeholder="请输入用户名">
         </div>
-        <div>
-            <label style="display: block; font-weight: 500; font-size: 13px; color: #475569; margin-bottom: 3px;">密码</label>
-            <input type="password" name="password" placeholder="密码（至少6位）" required style="padding: 7px 12px; border: 1px solid #d1d9e6; border-radius: 6px; font-size: 14px; width: 150px;">
+        <div class="form-group" style="margin-bottom: 0; width: 200px;">
+            <label>密码</label>
+            <input type="password" name="password" required placeholder="至少 6 位">
         </div>
-        <div style="display: flex; align-items: center; gap: 6px; padding-bottom: 2px;">
-            <label style="font-weight: normal; font-size: 13px; color: #475569; cursor: pointer;">
-                <input type="checkbox" name="is_admin"> 管理员
-            </label>
+        <div style="height: 32px; display: flex; align-items: center;">
+            <input type="checkbox" name="is_admin" id="is_admin">
+            <label for="is_admin" style="margin-bottom: 0; cursor: pointer; font-weight: normal;">设为管理员</label>
         </div>
-        <button type="submit" class="btn btn-success btn-sm">添加用户</button>
+        <button type="submit" class="btn btn-primary">确认添加</button>
     </form>
 </div>
 
-<!-- ===== 用户列表 ===== -->
-<div class="card">
-    <h2 style="font-size: 15px; font-weight: 600; color: #1e293b; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid #e8edf2;">📋 用户列表</h2>
+<div class="card" style="padding: 0;">
+    <div style="padding: 24px 24px 0;"><div class="card-title" style="border: none; margin: 0; padding: 0;">用户列表</div></div>
     <div class="table-wrapper">
         <table>
             <thead>
@@ -52,61 +44,41 @@
                     <th>用户名</th>
                     <th>角色</th>
                     <th>状态</th>
-                    <th>权限</th>
+                    <th>权限分类</th>
                     <th>创建时间</th>
-                    <th>操作</th>
+                    <th style="text-align: right;">操作</th>
                 </tr>
             </thead>
             <tbody>
                 {% for u in users %}
                 <tr>
-                    <td>
-                        <strong style="color: #1e293b;">{{ u.username }}</strong>
-                        {% if u.id == current_user.id %}
-                            <span class="tag" style="background: #dbeafe; color: #2563eb;">当前</span>
-                        {% endif %}
-                    </td>
-                    <td>{% if u.is_admin %}🔑 管理员{% else %}👤 普通用户{% endif %}</td>
-                    <td>
-                        <span class="tag" style="background: {% if u.is_active %}#e6f7e6{% else %}#fde8e8{% endif %}; color: {% if u.is_active %}#1a7a3a{% else %}#9b2c2c{% endif %};">
-                            {% if u.is_active %}启用{% else %}禁用{% endif %}
-                        </span>
-                    </td>
-                    <td style="font-size: 12px; max-width: 200px;">
-                        {% if u.is_admin %}
-                            <span style="color: #94a3b8;">无限制</span>
-                        {% else %}
-                            {% if not is_app_activated %}
-                                <span style="color: #f59e0b; font-size: 11px;">🔒 激活后可用</span>
-                            {% elif u.download_categories %}
-                                {% set cat_ids = u.download_categories.split(',') %}
-                                {% for c in categories if c.id|string in cat_ids %}
-                                    <span class="tag" style="background: #dbeafe; color: #1e40af;">{{ c.name }}</span>
-                                {% endfor %}
-                            {% else %}
-                                <span style="color: #94a3b8; font-size: 11px;">全部</span>
-                            {% endif %}
-                        {% endif %}
-                    </td>
-                    <td>{{ u.created_at.strftime('%Y-%m-%d') }}</td>
+                    <td style="font-weight: 500; color: var(--text-main);">{{ u.username }} {% if u.id == current_user.id %}<span class="tag tag-primary">当前</span>{% endif %}</td>
+                    <td>{% if u.is_admin %}<span class="tag" style="color: var(--primary); border-color: #91caff; background: #e6f4ff;">管理员</span>{% else %}普通用户{% endif %}</td>
+                    <td>{% if u.is_active %}<span style="color: var(--success);">启用</span>{% else %}<span style="color: var(--danger);">禁用</span>{% endif %}</td>
                     <td>
                         {% if not u.is_admin and is_app_activated %}
-                            <a href="{{ url_for('admin_edit_user_page', user_id=u.id) }}" class="btn btn-outline btn-sm" style="padding: 2px 8px; font-size: 11px;">权限</a>
+                            {% if u.download_categories %}
+                                {% set cat_ids = u.download_categories.split(',') %}
+                                {% for c in categories if c.id|string in cat_ids %}
+                                    <span class="tag">{{ c.name }}</span>
+                                {% endfor %}
+                            {% else %}
+                                <span class="text-muted">全部</span>
+                            {% endif %}
+                        {% else %}-{% endif %}
+                    </td>
+                    <td>{{ u.created_at.strftime('%Y-%m-%d') }}</td>
+                    <td style="text-align: right;">
+                        {% if not u.is_admin and is_app_activated %}
+                            <a href="{{ url_for('admin_edit_user_page', user_id=u.id) }}" class="btn btn-sm" style="margin-right: 8px;">权限</a>
                         {% endif %}
-                        <form method="POST" action="{{ url_for('admin_reset_password', user_id=u.id) }}" style="display: inline;" onsubmit="return confirm('确定重置该用户密码为 123456 吗？')">
-                            <button type="submit" class="btn btn-warning btn-sm" style="padding: 2px 8px; font-size: 11px;">重置</button>
-                        </form>
                         {% if u.id != current_user.id %}
-                            <form method="POST" action="{{ url_for('admin_toggle_user', user_id=u.id) }}" style="display: inline;">
-                                <button type="submit" class="btn btn-{% if u.is_active %}danger{% else %}success{% endif %} btn-sm" style="padding: 2px 8px; font-size: 11px;">
-                                    {% if u.is_active %}禁用{% else %}启用{% endif %}
-                                </button>
+                            <form method="POST" action="{{ url_for('admin_reset_password', user_id=u.id) }}" style="display: inline;" onsubmit="return confirm('确定重置密码为 123456 吗？')">
+                                <button type="submit" class="btn btn-sm btn-danger" style="margin-right: 8px;">重置</button>
                             </form>
-                            <form method="POST" action="{{ url_for('admin_delete_user', user_id=u.id) }}" style="display: inline;" onsubmit="return confirm('确定删除此用户？')">
-                                <button type="submit" class="btn btn-danger btn-sm" style="padding: 2px 8px; font-size: 11px;">删除</button>
+                            <form method="POST" action="{{ url_for('admin_delete_user', user_id=u.id) }}" style="display: inline;" onsubmit="return confirm('确定删除用户？')">
+                                <button type="submit" class="btn btn-sm btn-danger">删除</button>
                             </form>
-                        {% else %}
-                            <span class="text-muted" style="font-size: 11px;">不可操作</span>
                         {% endif %}
                     </td>
                 </tr>
@@ -114,6 +86,5 @@
             </tbody>
         </table>
     </div>
-    <div style="margin-top: 8px; font-size: 12px; color: #94a3b8;">⚠️ 管理员不能禁用或删除自己的账户</div>
 </div>
 {% endblock %}

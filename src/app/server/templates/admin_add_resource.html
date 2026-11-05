@@ -1,68 +1,161 @@
 {% extends "layout.html" %}
 {% block content %}
 <div class="flex-between mb-10">
-    <h2 style="color: #1e293b; font-size: 17px; font-weight: 600; display: flex; align-items: center; gap: 6px;">
-        <span style="font-size: 19px;">📄</span> 添加资源
-    </h2>
-    <a href="{{ url_for('admin_resources') }}" class="btn btn-outline btn-sm">← 返回</a>
+    <h2 style="font-size: 20px; font-weight: 600;">添加资源</h2>
+    <a href="{{ url_for('admin_resources') }}" class="btn">返回</a>
 </div>
 
 <div class="card">
-    <form method="POST" action="{{ url_for('admin_add_resource') }}" enctype="multipart/form-data">
-        <div style="margin-bottom: 12px;">
-            <label style="display: block; font-weight: 500; font-size: 13px; color: #475569; margin-bottom: 3px;">标题 *</label>
-            <input type="text" name="title" required style="width: 100%; padding: 7px 12px; border: 1px solid #d1d9e6; border-radius: 6px; font-size: 14px;">
+    <!-- 进度条 -->
+    <div id="progress-wrapper" style="display: none; margin-bottom: 24px;">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 14px;">
+            <span id="progress-text">上传中...</span>
+            <span id="progress-percent">0%</span>
         </div>
-        <div style="margin-bottom: 12px;">
-            <label style="display: block; font-weight: 500; font-size: 13px; color: #475569; margin-bottom: 3px;">分类</label>
-            <select name="category_id" style="width: 100%; padding: 7px 12px; border: 1px solid #d1d9e6; border-radius: 6px; font-size: 14px;">
+        <div style="width: 100%; height: 6px; background: #f0f0f0; border-radius: 3px; overflow: hidden;">
+            <div id="progress-bar" style="width: 0%; height: 100%; background: var(--primary); transition: width 0.3s;"></div>
+        </div>
+        <div id="progress-status" style="margin-top: 8px; font-size: 12px; color: var(--text-muted);"></div>
+    </div>
+
+    <div style="margin-bottom: 24px;">
+        <label>上传方式</label>
+        <select id="mode-select" style="max-width: 200px;">
+            <option value="single">单个上传</option>
+            <option value="batch">批量上传</option>
+        </select>
+    </div>
+
+    <!-- 单文件 -->
+    <form id="form-single" method="POST" action="{{ url_for('admin_add_resource') }}" enctype="multipart/form-data" class="upload-form">
+        <div class="form-group">
+            <label>资源标题 *</label>
+            <input type="text" name="title" required>
+        </div>
+        <div class="form-group">
+            <label>分类</label>
+            <select name="category_id">
                 <option value="">选择分类</option>
-                {% for c in categories %}
-                    <option value="{{ c.id }}">{{ c.name }}</option>
-                {% endfor %}
+                {% for c in categories %}<option value="{{ c.id }}">{{ c.name }}</option>{% endfor %}
             </select>
         </div>
-        <div style="margin-bottom: 12px;">
-            <label style="display: block; font-weight: 500; font-size: 13px; color: #475569; margin-bottom: 3px;">文件 *</label>
-            <input type="file" name="file" required style="padding: 4px;">
+        <div class="form-group">
+            <label>选择文件 *</label>
+            <input type="file" name="file" required style="border: none; padding: 0;">
         </div>
-        <div style="margin-bottom: 12px;">
-            <label style="display: block; font-weight: 500; font-size: 13px; color: #475569; margin-bottom: 3px;">描述（支持 Markdown）</label>
-            <textarea name="description" style="width: 100%; min-height: 100px; padding: 7px 12px; border: 1px solid #d1d9e6; border-radius: 6px; font-size: 14px; font-family: monospace;"></textarea>
+        <div class="form-group wide">
+            <label>资源描述 (支持 Markdown)</label>
+            <textarea name="description" style="min-height: 120px;"></textarea>
         </div>
-
-        <!-- ===== 标签区域（修复：复选框+标签名横排，左对齐） ===== -->
-        <div style="margin-bottom: 12px;">
-            <label style="display: block; font-weight: 500; font-size: 13px; color: #475569; margin-bottom: 4px;">标签</label>
-            <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+        <div class="form-group">
+            <label>标签</label>
+            <div style="display: flex; gap: 16px; flex-wrap: wrap;">
                 {% for t in tags %}
-                <label style="font-weight: normal; font-size: 13px; color: #475569; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; background: #f8fafc; padding: 3px 12px 3px 8px; border-radius: 4px; border: 1px solid #e8edf2;">
-                    <input type="checkbox" name="tag_ids" value="{{ t.id }}">
-                    {{ t.name }}
+                <label style="display: flex; align-items: center; cursor: pointer; margin-bottom: 0;">
+                    <input type="checkbox" name="tag_ids" value="{{ t.id }}"> {{ t.name }}
                 </label>
                 {% endfor %}
             </div>
-            <div style="font-size: 11px; color: #94a3b8; margin-top: 3px;">不勾选则不加标签</div>
         </div>
+        <button type="submit" class="btn btn-primary">提交资源</button>
+    </form>
 
-        <!-- ===== 批量上传区域 ===== -->
-        <div style="margin: 16px 0; padding: 14px 16px; background: #f0f7ff; border-radius: 6px; border: 1px dashed #2563eb;">
-            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
-                <span style="font-size: 16px;">📁</span>
-                <strong style="font-size: 14px; color: #1e293b;">批量上传</strong>
-                <span style="font-size: 12px; color: #94a3b8;">（选多个文件，每个自动创建资源）</span>
-            </div>
-            <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center;">
-                <input type="file" name="batch_files" multiple style="padding: 4px; font-size: 13px; flex: 1; min-width: 180px;">
-                <input type="text" name="title_prefix" placeholder="标题前缀（可选）" style="padding: 5px 10px; border: 1px solid #d1d9e6; border-radius: 6px; font-size: 13px; width: 140px;">
-                <button type="submit" formaction="{{ url_for('admin_add_resources_batch') }}" class="btn btn-success btn-sm">🚀批量提交</button>
-            </div>
-            <div style="font-size: 11px; color: #94a3b8; margin-top: 4px;">
-                💡文件名作为标题，支持同时选多个文件
+    <!-- 批量 -->
+    <form id="form-batch" method="POST" action="{{ url_for('admin_add_resources_batch') }}" enctype="multipart/form-data" class="upload-form" style="display: none;">
+        <div class="form-group">
+            <label>分类</label>
+            <select name="category_id">
+                <option value="">选择分类</option>
+                {% for c in categories %}<option value="{{ c.id }}">{{ c.name }}</option>{% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label>标题前缀 (可选)</label>
+            <input type="text" name="title_prefix" placeholder="例如：教程-">
+        </div>
+        <div class="form-group">
+            <label>选择多个文件 *</label>
+            <input type="file" name="batch_files" multiple required style="border: none; padding: 0;">
+        </div>
+        <div class="form-group wide">
+            <label>统一描述 (可选)</label>
+            <textarea name="description" style="min-height: 80px;"></textarea>
+        </div>
+        <div class="form-group">
+            <label>标签</label>
+            <div style="display: flex; gap: 16px; flex-wrap: wrap;">
+                {% for t in tags %}
+                <label style="display: flex; align-items: center; cursor: pointer; margin-bottom: 0;">
+                    <input type="checkbox" name="tag_ids" value="{{ t.id }}"> {{ t.name }}
+                </label>
+                {% endfor %}
             </div>
         </div>
-
-        <button type="submit" class="btn btn-success">提交</button>
+        <button type="submit" class="btn btn-primary">批量导入</button>
     </form>
 </div>
+
+<script>
+document.getElementById('mode-select').addEventListener('change', function() {
+    var val = this.value;
+    document.getElementById('form-single').style.display = val === 'single' ? 'block' : 'none';
+    document.getElementById('form-batch').style.display = val === 'batch' ? 'block' : 'none';
+});
+
+(function() {
+    var forms = document.querySelectorAll('.upload-form');
+    var wrapper = document.getElementById('progress-wrapper');
+    var bar = document.getElementById('progress-bar');
+    var text = document.getElementById('progress-text');
+    var percent = document.getElementById('progress-percent');
+    var status = document.getElementById('progress-status');
+
+    forms.forEach(function(form) {
+        form.addEventListener('submit', function(e) {
+            var files = form.querySelector('input[type="file"]').files;
+            if (!files || files.length === 0) return;
+
+            var hasLarge = false;
+            var total = 0;
+            for (var i = 0; i < files.length; i++) {
+                total += files[i].size;
+                if (files[i].size > 5 * 1024 * 1024) hasLarge = true;
+            }
+            if (!hasLarge && files.length <= 5) return; // 小文件直接提交
+
+            e.preventDefault();
+            wrapper.style.display = 'block';
+            bar.style.width = '0%';
+            percent.textContent = '0%';
+            text.textContent = '正在上传...';
+            status.textContent = '共 ' + files.length + ' 个文件，总计 ' + (total/1024/1024).toFixed(2) + ' MB';
+
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', form.action, true);
+
+            xhr.upload.addEventListener('progress', function(ev) {
+                if (ev.lengthComputable) {
+                    var p = Math.round((ev.loaded / ev.total) * 100);
+                    bar.style.width = p + '%';
+                    percent.textContent = p + '%';
+                }
+            });
+
+            xhr.onload = function() {
+                if (xhr.status >= 200 && xhr.status < 300) {
+                    bar.style.width = '100%';
+                    percent.textContent = '100%';
+                    text.textContent = '上传完成';
+                    window.location.href = '{{ url_for("admin_resources") }}';
+                } else {
+                    text.textContent = '上传失败';
+                    bar.style.background = 'var(--danger)';
+                }
+            };
+            xhr.onerror = function() { text.textContent = '网络错误'; };
+            xhr.send(new FormData(form));
+        });
+    });
+})();
+</script>
 {% endblock %}
