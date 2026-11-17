@@ -81,7 +81,7 @@
 | 修复 | 修复用户权限授权时勾选多个资源分类无效的问题 |
 | 优化 | UI优化 |
 
-[1.2.1版下载按钮](https://gitee.com/hhxs2025/cloud-resources/releases/download/1.2.1/cloud-resources.fpk)
+[1.2.1版下载按钮](https://gitee.com/hhxs2025/cloud-resources/releases/download/1.2.1/cloud-resources-x86-so.fpk)
 
 
 ### 预览图
