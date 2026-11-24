@@ -1,75 +1,64 @@
 {% extends "layout.html" %}
 {% block content %}
 <div class="flex-between mb-10">
-    <h2 style="color: #1e293b; font-size: 18px; font-weight: 600; display: flex; align-items: center; gap: 6px;">
-        <span style="font-size: 20px;">📂</span> 全部资源
-    </h2>
-    <form method="GET" action="{{ url_for('resource_list') }}" class="flex" style="flex-wrap: wrap; gap: 6px;">
-        <input type="text" name="keyword" placeholder="搜索资源..." value="{{ keyword or '' }}" style="padding: 5px 12px; border: 1px solid #d1d9e6; border-radius: 6px; font-size: 13px; min-width: 140px; height: 32px;">
-        <button type="submit" class="btn btn-primary btn-sm">搜索</button>
+    <div>
+        <h2 style="font-size: 20px; font-weight: 600; margin-bottom: 4px;">全部资源</h2>
+        <div class="text-muted">共 {{ resources|length }} 个资源</div>
+    </div>
+    <form method="GET" action="{{ url_for('resource_list') }}" style="display: flex; gap: 8px; width: 100%; max-width: 400px;">
+        <input type="text" name="keyword" placeholder="搜索资源..." value="{{ keyword or '' }}" style="flex: 1;">
+        <button type="submit" class="btn btn-primary">搜索</button>
     </form>
 </div>
 
-<!-- ===== 分类筛选 ===== -->
-<div class="flex mb-10" style="gap: 6px; flex-wrap: wrap;">
-    <a href="{{ url_for('resource_list') }}" class="btn {% if not selected_category and not selected_tag %}btn-primary{% else %}btn-outline{% endif %} btn-sm">全部</a>
-    {% for c in categories %}
-        <a href="{{ url_for('resource_list', category=c.id) }}" class="btn {% if selected_category == c.id %}btn-primary{% else %}btn-outline{% endif %} btn-sm">{{ c.name }}</a>
-    {% endfor %}
+<div style="background: #fff; border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; margin-bottom: 24px;">
+    <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 12px;">
+        <span class="text-muted">分类：</span>
+        <a href="{{ url_for('resource_list') }}" class="btn btn-sm {% if not selected_category %}btn-primary{% endif %}">全部</a>
+        {% for c in categories %}
+            <a href="{{ url_for('resource_list', category=c.id) }}" class="btn btn-sm {% if selected_category == c.id %}btn-primary{% endif %}">{{ c.name }}</a>
+        {% endfor %}
+    </div>
+    {% if tags %}
+    <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+        <span class="text-muted">标签：</span>
+        {% for t in tags %}
+            <a href="{{ url_for('resource_list', tag=t.id) }}" class="btn btn-sm {% if selected_tag == t.id %}btn-primary{% endif %}">#{{ t.name }}</a>
+        {% endfor %}
+    </div>
+    {% endif %}
 </div>
 
-<!-- ===== 标签筛选 ===== -->
-<div class="flex mb-10" style="gap: 6px; flex-wrap: wrap;">
-    {% for t in tags %}
-        <a href="{{ url_for('resource_list', tag=t.id) }}" class="btn {% if selected_tag == t.id %}btn-primary{% else %}btn-outline{% endif %} btn-sm">#{{ t.name }}</a>
-    {% endfor %}
-</div>
-
-<!-- ===== 资源列表：表格视图（1.1.0 改为列表） ===== -->
-<div class="card" style="padding: 0; overflow: hidden;">
+<div class="card" style="padding: 0;">
     {% if resources %}
         <div class="table-wrapper">
             <table>
                 <thead>
                     <tr>
-                        <th style="width: 30px; padding-left: 16px;">#</th>
-                        <th style="text-align: left;">资源名称</th>
-                        <th style="text-align: left;">分类</th>
-                        <th style="text-align: left;">标签</th>
-                        <th style="text-align: right;">大小</th>
-                        <th style="text-align: right;">下载</th>
-                        <th style="text-align: right;">日期</th>
-                        <th style="text-align: center; width: 130px;">操作</th>
+                        <th style="width: 60px; text-align: center;">#</th>
+                        <th>资源名称</th>
+                        <th style="width: 120px;">分类</th>
+                        <th style="width: 180px;">标签</th>
+                        <th style="width: 100px; text-align: right;">大小</th>
+                        <th style="width: 80px; text-align: right;">下载量</th>
+                        <th style="width: 120px; text-align: center;">日期</th>
+                        <th style="width: 150px; text-align: center;">操作</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for r in resources %}
                     <tr>
-                        <td style="padding-left: 16px; color: #94a3b8; font-size: 12px;">{{ loop.index }}</td>
-                        <td>
-                            <a href="{{ url_for('resource_detail', resource_id=r.id) }}" style="color: #1e293b; text-decoration: none; font-weight: 500;">
-                                {{ r.title }}
-                            </a>
-                        </td>
-                        <td>
-                            {% if r.category %}
-                                <span class="tag">{{ r.category.name }}</span>
-                            {% else %}
-                                <span style="color: #94a3b8; font-size: 12px;">-</span>
-                            {% endif %}
-                        </td>
-                        <td>
-                            {% for tag in r.tags %}
-                                <span class="tag">{{ tag.name }}</span>
-                            {% endfor %}
-                        </td>
-                        <td style="text-align: right; color: #64748b; font-size: 13px;">{{ r.file_size|filesizeformat }}</td>
-                        <td style="text-align: right; color: #64748b; font-size: 13px;">{{ r.download_count }}</td>
-                        <td style="text-align: right; color: #94a3b8; font-size: 12px;">{{ r.created_at.strftime('%Y-%m-%d') }}</td>
+                        <td style="text-align: center; color: var(--text-muted);">{{ loop.index }}</td>
+                        <td><a href="{{ url_for('resource_detail', resource_id=r.id) }}" style="color: var(--primary); font-weight: 500;">{{ r.title }}</a></td>
+                        <td>{% if r.category %}<span class="tag">{{ r.category.name }}</span>{% else %}-{% endif %}</td>
+                        <td>{% for tag in r.tags %}<span class="tag tag-primary">{{ tag.name }}</span>{% endfor %}</td>
+                        <td style="text-align: right;">{{ r.file_size|filesizeformat }}</td>
+                        <td style="text-align: right;">{{ r.download_count }}</td>
+                        <td style="text-align: center;">{{ r.created_at.strftime('%Y-%m-%d') }}</td>
                         <td style="text-align: center;">
-                            <a href="{{ url_for('resource_detail', resource_id=r.id) }}" class="btn btn-outline btn-sm" style="padding: 2px 10px; font-size: 12px;">详情</a>
+                            <a href="{{ url_for('resource_detail', resource_id=r.id) }}" class="btn btn-sm">详情</a>
                             {% if current_user.is_authenticated %}
-                                <a href="{{ url_for('download_resource', resource_id=r.id) }}" class="btn btn-primary btn-sm" style="padding: 2px 10px; font-size: 12px;">下载</a>
+                                <a href="{{ url_for('download_resource', resource_id=r.id) }}" class="btn btn-primary btn-sm" style="margin-left: 8px;">下载</a>
                             {% endif %}
                         </td>
                     </tr>
@@ -77,15 +66,10 @@
                 </tbody>
             </table>
         </div>
-        <div style="padding: 10px 16px; border-top: 1px solid #e8edf2; color: #94a3b8; font-size: 12px; background: #fafbfc;">
-            共 {{ resources|length }} 个资源
-        </div>
     {% else %}
-        <div style="padding: 30px 20px; text-align: center; color: #94a3b8; font-size: 14px;">
-            📭 暂无资源
-            {% if current_user.is_authenticated and current_user.is_admin %}
-                ，<a href="{{ url_for('admin_add_resource_page') }}" style="color: #2563eb;">去添加</a>
-            {% endif %}
+        <div style="padding: 60px 20px; text-align: center;">
+            <h3 style="font-size: 16px; font-weight: 500; margin-bottom: 8px;">暂无资源</h3>
+            <p class="text-muted">管理员还未上传任何资源</p>
         </div>
     {% endif %}
 </div>
